@@ -9,6 +9,10 @@ pub use persistence::{get,store};
 pub mod handler;
 pub use handler::Handler;
 
+// Trait to create contracts
+pub mod contract;
+pub use contract::{Contract, dispatch};
+
 mod sink;
 pub use self::sink::Sink;
 

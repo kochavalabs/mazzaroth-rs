@@ -1,0 +1,6 @@
+[package]
+name = "mazzaroth-wasm"
+version = "0.1.0"
+authors = ["jeffsimpson <jsimpson@kochava.com>"]
+
+[dependencies]

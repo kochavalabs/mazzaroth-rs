@@ -5,10 +5,6 @@ mod common;
 pub mod persistence;
 pub use persistence::{get,store};
 
-// handler for registering contract functions and executing
-pub mod handler;
-pub use handler::Handler;
-
 // Trait to create contracts
 pub mod contract;
 pub use contract::{Contract, dispatch};

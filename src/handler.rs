@@ -12,7 +12,7 @@ impl Handler {
         Handler { function_map: HashMap::new() }
     }
 
-    pub fn addHandler(&mut self, handler_id: String, function: fn(&mut Request) -> Response) {
+    pub fn add(&mut self, handler_id: String, function: fn(&mut Request) -> Response) {
         self.function_map.insert(handler_id, function);
     }
 

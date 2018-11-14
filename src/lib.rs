@@ -21,10 +21,8 @@ pub use stream::Stream;
 
 #[no_mangle]
 extern {
-    pub fn fetch_handler(args: *mut u8);
-    pub fn handler_length() -> u32;
-	pub fn fetch_payload(args: *mut u8);
-    pub fn payload_length() -> u32;
+	pub fn fetch_input(args: *mut u8);
+    pub fn input_length() -> u32;
 
     pub fn ret(x: &Vec<u8>); // Gets pointer to encoded returns
 
@@ -64,6 +62,7 @@ pub struct CallParams {
 
 // Request and Response types used by Smart Contract funcs
 pub struct Request {
+	pub handler_id: String,
     pub body: Vec<u8>,
 }
 

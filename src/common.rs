@@ -116,14 +116,23 @@ impl AbiType for String {
 // Request is just made up of a body of Vec<u8> bytes currently for decode and encode
 impl AbiType for Request {
 	fn decode(stream: &mut Stream) -> Result<Self, Error> {
+		let handler_id = String::decode(stream)?;
 		let body = Vec::decode(stream)?;
 
-		let result = Request { body: body, };
+		let result = Request { 
+			handler_id: handler_id,
+			body: body, 
+		};
 
 		Ok(result)
 	}
 
 	fn encode(self, sink: &mut Sink) {
+		let id = self.handler_id;
+		let id_len = id.len();
+		sink.push(id_len as u32);
+		sink.values_mut().extend_from_slice(&id.into_bytes());
+
 		let val = self.body;
 		let len = val.len();
 		sink.push(len as u32);
@@ -138,7 +147,9 @@ impl AbiType for Response {
 	fn decode(stream: &mut Stream) -> Result<Self, Error> {
 		let body = Vec::decode(stream)?;
 
-		let result = Response { body: body, };
+		let result = Response {
+			body: body, 
+		};
 
 		Ok(result)
 	}

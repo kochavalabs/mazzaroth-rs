@@ -15,8 +15,9 @@ pub use self::sink::Sink;
 mod stream;
 pub use stream::Stream;
 
+// externals are used in this crate to interact with runtime
 mod external;
-pub use external::*;
+pub(crate) use external::*;
 
 /// Error for decoding rust types from stream
 #[derive(Debug, PartialEq, Eq)]
@@ -44,4 +45,14 @@ pub struct Request {
 
 pub struct Response {
     pub body: Vec<u8>,
+}
+
+/// Return a response to the runtime
+pub fn ret(response: Response) {
+	// encode the Response and send as bytes
+	let mut sink = Sink::new();
+
+	sink.push(response);
+
+	unsafe {_ret(&sink.values())};
 }

@@ -127,15 +127,11 @@ impl AbiType for Request {
 	}
 
 	fn encode(self, sink: &mut Sink) {
-		let id = self.handler_id;
-		let id_len = id.len();
-		sink.push(id_len as u32);
-		sink.values_mut().extend_from_slice(&id.into_bytes());
+		// Push handler_id (Strinng) first
+		sink.push(self.handler_id);
 
-		let val = self.body;
-		let len = val.len();
-		sink.push(len as u32);
-		sink.values_mut().extend_from_slice(&val[..]);
+		// Push body (Vec<u8>) as second value
+		sink.push(self.body);
 	}
 
 	const IS_FIXED: bool = false;
@@ -153,10 +149,8 @@ impl AbiType for Response {
 	}
 
 	fn encode(self, sink: &mut Sink) {
-		let val = self.body;
-		let len = val.len();
-		sink.push(len as u32);
-		sink.values_mut().extend_from_slice(&val[..]);
+		// Push body (Vec<u8>) as only value
+		sink.push(self.body);
 	}
 	
 	const IS_FIXED: bool = false;

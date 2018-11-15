@@ -19,7 +19,7 @@ mod external;
 pub use external::*;
 
 /// Error for decoding rust types from stream
-#[derive(Debug, PartialEq, Eq)] // Allows us to use expect() for these Error types
+#[derive(Debug, PartialEq, Eq)]
 pub enum Error {
 	/// Unexpected end of the stream
 	UnexpectedEof,
@@ -37,12 +37,6 @@ pub trait AbiType : Sized {
 
 	/// Whether type has fixed length or not
 	const IS_FIXED: bool;
-}
-
-/// Parameters to the call function, specify the handler to call and payload for args
-pub struct CallParams {
-    pub handler_id: String,
-    pub payload: Vec<u8>,
 }
 
 // Request and Response types used by Smart Contract funcs

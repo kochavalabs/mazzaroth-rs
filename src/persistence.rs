@@ -1,11 +1,11 @@
-use super::{_get,get_length,_store};
+use super::{_get,_get_length,_store};
 
 pub fn get(key: &str) -> Vec<u8> {
     let key = key.as_bytes();
-    let len = unsafe { get_length(&key.to_vec()) };
+    let len = unsafe { _get_length(key.as_ptr(), key.len()) };
     let mut val = Vec::with_capacity(len as usize);
     unsafe { val.set_len(len as usize) };
-    unsafe { _get(&key.to_vec(), &val) };
+    unsafe { _get(key.as_ptr(), key.len(), val.as_mut_ptr()) };
     val
 }
 

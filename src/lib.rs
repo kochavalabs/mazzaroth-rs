@@ -34,9 +34,6 @@ pub trait AbiType : Sized {
 	/// Push type to data sink
 	/// Should never be called manually! Use sink.push(val)
 	fn encode(self, sink: &mut Sink);
-
-	/// Whether type has fixed length or not
-	const IS_FIXED: bool;
 }
 
 // Request and Response types used by Smart Contract funcs

@@ -41,9 +41,4 @@ impl<'a> Stream<'a> {
 	pub fn payload(&self) -> &[u8] {
 		self.payload
 	}
-
-	/// Peek next byte in stream
-	pub fn peek(&self) -> u8 {
-		self.payload[self.position]
-	}
 }

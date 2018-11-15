@@ -24,8 +24,6 @@ impl AbiType for u32 {
 	    bytes[3] = (self >> 24) as u8;
 		sink.values_mut().extend_from_slice(&bytes[..]);
 	}
-
-	const IS_FIXED: bool = true;
 }
 
 impl AbiType for u64 {
@@ -61,8 +59,6 @@ impl AbiType for u64 {
 
 		sink.values_mut().extend_from_slice(&bytes[..]);
 	}
-
-	const IS_FIXED: bool = true;
 }
 
 impl AbiType for Vec<u8> {
@@ -85,8 +81,6 @@ impl AbiType for Vec<u8> {
 		sink.push(len as u32);
 		sink.values_mut().extend_from_slice(&val[..]);
 	}
-
-	const IS_FIXED: bool = false;
 }
 
 impl AbiType for String {
@@ -109,8 +103,6 @@ impl AbiType for String {
 		sink.push(len as u32);
 		sink.values_mut().extend_from_slice(&val.into_bytes());
 	}
-
-	const IS_FIXED: bool = false;
 }
 
 impl AbiType for Request {
@@ -133,8 +125,6 @@ impl AbiType for Request {
 		// Push body (Vec<u8>) as second value
 		sink.push(self.body);
 	}
-
-	const IS_FIXED: bool = false;
 }
 
 impl AbiType for Response {
@@ -152,6 +142,4 @@ impl AbiType for Response {
 		// Push body (Vec<u8>) as only value
 		sink.push(self.body);
 	}
-	
-	const IS_FIXED: bool = false;
 }

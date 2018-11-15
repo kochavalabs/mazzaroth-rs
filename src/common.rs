@@ -113,7 +113,6 @@ impl AbiType for String {
 	const IS_FIXED: bool = false;
 }
 
-// Request is just made up of a body of Vec<u8> bytes currently for decode and encode
 impl AbiType for Request {
 	fn decode(stream: &mut Stream) -> Result<Self, Error> {
 		let handler_id = String::decode(stream)?;
@@ -142,7 +141,6 @@ impl AbiType for Request {
 	const IS_FIXED: bool = false;
 }
 
-// Response is just made up of a body of Vec<u8> bytes currently for decode and encode
 impl AbiType for Response {
 	fn decode(stream: &mut Stream) -> Result<Self, Error> {
 		let body = Vec::decode(stream)?;

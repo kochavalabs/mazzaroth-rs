@@ -1,4 +1,4 @@
-use super::{_fetch_input, _input_length, Request, Response, Stream};
+use super::{Request, Response, Stream, _fetch_input, _input_length};
 
 /// This trait defines a function that will be called on a contract.
 /// It is up to the contract to setup handlers and call the appropriate
@@ -12,7 +12,6 @@ pub trait Contract {
 /// TODO: Expand this to not need an execute function and to work with
 /// various parameters/returns of contract functions.
 pub fn dispatch(mut contract: Box<Contract>) -> Response {
-
     // Get Request from runtime
     let length = unsafe { _input_length() };
     let mut input: Vec<u8> = Vec::with_capacity(length as usize);

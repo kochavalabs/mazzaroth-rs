@@ -1,13 +1,12 @@
-
 mod common;
 
 // Persistence provides get and store functions to use host DB
 pub mod persistence;
-pub use persistence::{get,store};
+pub use persistence::{get, store};
 
 // Contract trait and dispatch function for interacting with smart contracts.
 pub mod contract;
-pub use contract::{Contract, dispatch};
+pub use contract::{dispatch, Contract};
 
 // Sink and stream used for encoding/decoding values passed between runtime
 // Can be used to create a custom AbiType.
@@ -23,24 +22,24 @@ pub(crate) use external::*;
 /// Error for decoding rust types from stream
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
-	/// Unexpected end of the stream
-	UnexpectedEof,
+    /// Unexpected end of the stream
+    UnexpectedEof,
 }
 
 /// AbiType trait
-pub trait AbiType : Sized {
-	/// Insantiate type from data stream
-	/// Should never be called manually! Use stream.pop()
-	fn decode(stream: &mut Stream) -> Result<Self, Error>;
+pub trait AbiType: Sized {
+    /// Insantiate type from data stream
+    /// Should never be called manually! Use stream.pop()
+    fn decode(stream: &mut Stream) -> Result<Self, Error>;
 
-	/// Push type to data sink
-	/// Should never be called manually! Use sink.push(val)
-	fn encode(self, sink: &mut Sink);
+    /// Push type to data sink
+    /// Should never be called manually! Use sink.push(val)
+    fn encode(self, sink: &mut Sink);
 }
 
 // Request and Response types used by Smart Contract funcs
 pub struct Request {
-	pub handler_id: String,
+    pub handler_id: String,
     pub body: Vec<u8>,
 }
 
@@ -50,12 +49,12 @@ pub struct Response {
 
 /// Return a response to the runtime
 pub fn ret(response: Response) {
-	// encode the Response and send as bytes
-	let mut sink = Sink::new();
+    // encode the Response and send as bytes
+    let mut sink = Sink::new();
 
-	sink.push(response);
+    sink.push(response);
 
-	let values = sink.values();
+    let values = sink.values();
 
-	unsafe {_ret(values.as_ptr(), values.len())};
+    unsafe { _ret(values.as_ptr(), values.len()) };
 }

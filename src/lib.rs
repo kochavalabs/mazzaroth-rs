@@ -53,6 +53,8 @@ pub fn ret(response: Response) {
 	let mut sink = Sink::new();
 
 	sink.push(response);
+	
+	let values = sink.values();
 
-	unsafe {_ret(&sink.values())};
+	unsafe {_ret(values.as_ptr(), values.len())};
 }

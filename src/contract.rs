@@ -1,4 +1,3 @@
-
 use super::{_fetch_input, _input_length, Request, Response, Stream};
 
 pub trait Contract {

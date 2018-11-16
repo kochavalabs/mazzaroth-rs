@@ -9,8 +9,8 @@ extern {
     /// Use the return to set the capacity and length of a vector to call _fetch_input.
     pub(crate) fn _input_length() -> u32;
 
-    /// Returns bytes to the runtime if a call needs to return a value.
-    pub(crate) fn _ret(bytes: &Vec<u8>);
+    /// Returns ptr to bytes to the runtime if a call needs to return a value.
+    pub(crate) fn _ret(bytes: *const u8, bytes_length: usize);
 
     /// Store a key/value in the persistent DB provided by the runtime.
 	pub(crate) fn _store(key: *const u8, key_length: usize, value: *const u8, value_length: usize);

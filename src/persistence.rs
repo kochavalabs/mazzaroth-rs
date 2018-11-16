@@ -1,5 +1,6 @@
 use super::{_get,_get_length,_store};
 
+/// Get the value associated with a string key from the persistent storage for this runtime.
 pub fn get(key: &str) -> Vec<u8> {
     let key = key.as_bytes();
     let len = unsafe { _get_length(key.as_ptr(), key.len()) };
@@ -9,6 +10,7 @@ pub fn get(key: &str) -> Vec<u8> {
     val
 }
 
+/// Store a key/value pair in the persistent storage for this runtime.
 pub fn store(key: &str, val: Vec<u8>) {
     let key = key.as_bytes();
     unsafe { _store(key.as_ptr(), key.len(), val.as_ptr(), val.len()) };

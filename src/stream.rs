@@ -1,8 +1,8 @@
-//! Stream module
-
 use super::{AbiType, Error};
 
-/// Stream interpretation of incoming payload
+/// Stream interpretation of incoming payload.
+/// Values are expected to be encoded AbiTypes that are
+/// decoded when popped.
 pub struct Stream<'a> {
 	payload: &'a [u8],
 	position: usize,

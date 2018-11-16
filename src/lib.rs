@@ -5,13 +5,14 @@ mod common;
 pub mod persistence;
 pub use persistence::{get,store};
 
-// Trait to create contracts
+// Contract trait and dispatch function for interacting with smart contracts.
 pub mod contract;
 pub use contract::{Contract, dispatch};
 
+// Sink and stream used for encoding/decoding values passed between runtime
+// Can be used to create a custom AbiType.
 mod sink;
 pub use self::sink::Sink;
-
 mod stream;
 pub use stream::Stream;
 
@@ -26,7 +27,7 @@ pub enum Error {
 	UnexpectedEof,
 }
 
-/// Abi type trait
+/// AbiType trait
 pub trait AbiType : Sized {
 	/// Insantiate type from data stream
 	/// Should never be called manually! Use stream.pop()
@@ -53,7 +54,7 @@ pub fn ret(response: Response) {
 	let mut sink = Sink::new();
 
 	sink.push(response);
-	
+
 	let values = sink.values();
 
 	unsafe {_ret(values.as_ptr(), values.len())};

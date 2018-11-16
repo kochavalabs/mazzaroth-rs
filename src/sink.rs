@@ -1,6 +1,8 @@
 use super::AbiType;
 
-/// Sink for returning number of arguments
+/// Sink for returning a number of arguments.
+/// To push a value to the sink it must implement
+/// the AbiType trait for encoding.
 pub struct Sink {
 	values: Vec<u8>,
 }

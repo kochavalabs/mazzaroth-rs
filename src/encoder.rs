@@ -1,24 +1,24 @@
 use super::AbiType;
 
-/// Sink for returning a number of arguments.
-/// To push a value to the sink it must implement
+/// Encoder for returning a number of arguments.
+/// To push a value to the encoder it must implement
 /// the AbiType trait for encoding.
-pub struct Sink {
+pub struct Encoder {
     values: Vec<u8>,
 }
 
-impl Sink {
-    /// New sink that will grow as items are pushed
+impl Encoder {
+    /// New encoder that will grow as items are pushed
     pub fn new() -> Self {
-        Sink { values: Vec::new() }
+        Encoder { values: Vec::new() }
     }
 
-    /// Consume `val` to the Sink
+    /// Consume `val` to the Encoder
     pub fn push<T: AbiType>(&mut self, val: T) {
         val.encode(self)
     }
 
-    /// Mutable reference to the Sink vector
+    /// Mutable reference to the Encoder vector
     pub fn values_mut(&mut self) -> &mut Vec<u8> {
         &mut self.values
     }

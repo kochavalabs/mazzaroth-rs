@@ -1,4 +1,4 @@
-use super::{Request, Response, Stream, _fetch_input, _input_length};
+use super::{Decoder, Request, Response, _fetch_input, _input_length};
 
 /// This trait defines a function that will be called on a contract.
 /// It is up to the contract to setup handlers and call the appropriate
@@ -20,8 +20,8 @@ pub fn dispatch(mut contract: Box<Contract>) -> Response {
         _fetch_input(input.as_mut_ptr());
     }
 
-    let mut stream = Stream::new(&input);
-    let request = stream.pop().expect("request decoding failed");
+    let mut decoder = Decoder::new(&input);
+    let request = decoder.pop().expect("request decoding failed");
 
     contract.execute(request)
 }

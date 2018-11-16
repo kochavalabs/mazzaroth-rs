@@ -1,3 +1,4 @@
+// Define the custom AbiType implementations
 mod common;
 
 // Persistence provides get and store functions to use host DB
@@ -8,33 +9,31 @@ pub use persistence::{get, store};
 pub mod contract;
 pub use contract::{dispatch, Contract};
 
-// Sink and stream used for encoding/decoding values passed between runtime
+// Encoder and Decoder used for passing data between runtime
 // Can be used to create a custom AbiType.
-mod sink;
-pub use self::sink::Sink;
-mod stream;
-pub use stream::Stream;
+mod encoder;
+pub use encoder::Encoder;
+mod decoder;
+pub use decoder::Decoder;
 
 // externals are used in this crate to interact with runtime
 mod external;
 pub(crate) use external::*;
 
-/// Error for decoding rust types from stream
+/// Error for decoding rust types from decoder
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
-    /// Unexpected end of the stream
+    /// Unexpected end of the decoder
     UnexpectedEof,
 }
 
 /// AbiType trait
 pub trait AbiType: Sized {
-    /// Insantiate type from data stream
-    /// Should never be called manually! Use stream.pop()
-    fn decode(stream: &mut Stream) -> Result<Self, Error>;
+    /// Define how objects should be decoded.
+    fn decode(decoder: &mut Decoder) -> Result<Self, Error>;
 
-    /// Push type to data sink
-    /// Should never be called manually! Use sink.push(val)
-    fn encode(self, sink: &mut Sink);
+    /// Define how objects should be encoded.
+    fn encode(self, encoder: &mut Encoder);
 }
 
 // Request and Response types used by Smart Contract funcs
@@ -50,11 +49,11 @@ pub struct Response {
 /// Return a response to the runtime
 pub fn ret(response: Response) {
     // encode the Response and send as bytes
-    let mut sink = Sink::new();
+    let mut encoder = Encoder::new();
 
-    sink.push(response);
+    encoder.push(response);
 
-    let values = sink.values();
+    let values = encoder.values();
 
     unsafe { _ret(values.as_ptr(), values.len()) };
 }

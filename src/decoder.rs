@@ -1,17 +1,17 @@
 use super::{AbiType, Error};
 
-/// Stream interpretation of incoming payload.
+/// Decode a payload of bytes.
 /// Values are expected to be encoded AbiTypes that are
 /// decoded when popped.
-pub struct Stream<'a> {
+pub struct Decoder<'a> {
     payload: &'a [u8],
     position: usize,
 }
 
-impl<'a> Stream<'a> {
-    /// New stream for known payload
+impl<'a> Decoder<'a> {
+    /// New decoder for known payload
     pub fn new(raw: &'a [u8]) -> Self {
-        Stream {
+        Decoder {
             payload: raw,
             position: 0,
         }
@@ -22,12 +22,12 @@ impl<'a> Stream<'a> {
         T::decode(self)
     }
 
-    /// Current position for the stream
+    /// Current position for the decoder
     pub fn position(&self) -> usize {
         self.position
     }
 
-    /// Advance stream position for `amount` bytes
+    /// Advance decoder position for `amount` bytes
     pub fn advance(&mut self, amount: usize) -> Result<usize, Error> {
         if self.position + amount > self.payload.len() {
             return Err(Error::UnexpectedEof);
@@ -38,7 +38,7 @@ impl<'a> Stream<'a> {
         Ok(old_position)
     }
 
-    /// Stream payload
+    /// Decoder payload
     pub fn payload(&self) -> &[u8] {
         self.payload
     }

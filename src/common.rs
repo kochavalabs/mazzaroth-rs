@@ -1,12 +1,12 @@
-use super::{AbiType, Error, Request, Response, Sink, Stream};
+use super::{AbiType, Decoder, Encoder, Error, Request, Response};
 use std::str;
 
 impl AbiType for u32 {
-    fn decode(stream: &mut Stream) -> Result<Self, Error> {
-        // Returns UnexpectedEof if stream cannot advance
-        let previous_position = stream.advance(4)?;
+    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
+        // Returns UnexpectedEof if decoder cannot advance
+        let previous_position = decoder.advance(4)?;
 
-        let slice = &stream.payload()[previous_position..stream.position()];
+        let slice = &decoder.payload()[previous_position..decoder.position()];
 
         let result = (slice[0] as u32)
             + ((slice[1] as u32) << 8)
@@ -16,22 +16,22 @@ impl AbiType for u32 {
         Ok(result)
     }
 
-    fn encode(self, sink: &mut Sink) {
+    fn encode(self, encoder: &mut Encoder) {
         let mut bytes = [0u8; 4];
         bytes[0] = self as u8;
         bytes[1] = (self >> 8) as u8;
         bytes[2] = (self >> 16) as u8;
         bytes[3] = (self >> 24) as u8;
-        sink.values_mut().extend_from_slice(&bytes[..]);
+        encoder.values_mut().extend_from_slice(&bytes[..]);
     }
 }
 
 impl AbiType for u64 {
-    fn decode(stream: &mut Stream) -> Result<Self, Error> {
-        // Returns UnexpectedEof if stream cannot advance
-        let previous_position = stream.advance(8)?;
+    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
+        // Returns UnexpectedEof if decoder cannot advance
+        let previous_position = decoder.advance(8)?;
 
-        let slice = &stream.payload()[previous_position..stream.position()];
+        let slice = &decoder.payload()[previous_position..decoder.position()];
 
         let result = (slice[0] as u64)
             + ((slice[1] as u64) << 8)
@@ -45,7 +45,7 @@ impl AbiType for u64 {
         Ok(result)
     }
 
-    fn encode(self, sink: &mut Sink) {
+    fn encode(self, encoder: &mut Encoder) {
         let mut bytes = [0u8; 8];
         bytes[0] = self as u8;
         bytes[1] = (self >> 8) as u8;
@@ -56,60 +56,61 @@ impl AbiType for u64 {
         bytes[6] = (self >> 48) as u8;
         bytes[7] = (self >> 56) as u8;
 
-        sink.values_mut().extend_from_slice(&bytes[..]);
+        encoder.values_mut().extend_from_slice(&bytes[..]);
     }
 }
 
 impl AbiType for Vec<u8> {
-    fn decode(stream: &mut Stream) -> Result<Self, Error> {
+    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
         // First decode the length, then the rest of the payload based on length
-        let len = u32::decode(stream)? as usize;
+        let len = u32::decode(decoder)? as usize;
 
-        let result = stream.payload()[stream.position()..stream.position() + len].to_vec();
+        let result = decoder.payload()[decoder.position()..decoder.position() + len].to_vec();
 
-        // Advance stream pointer past the value
-        // Returns UnexpectedEof if stream cannot advance
-        stream.advance(len)?;
+        // Advance decoder pointer past the value
+        // Returns UnexpectedEof if decoder cannot advance
+        decoder.advance(len)?;
 
         Ok(result)
     }
 
-    fn encode(self, sink: &mut Sink) {
+    fn encode(self, encoder: &mut Encoder) {
         let val = self;
         let len = val.len();
-        sink.push(len as u32);
-        sink.values_mut().extend_from_slice(&val[..]);
+        encoder.push(len as u32);
+        encoder.values_mut().extend_from_slice(&val[..]);
     }
 }
 
 impl AbiType for String {
-    fn decode(stream: &mut Stream) -> Result<Self, Error> {
+    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
         // First decode the length, then the rest of the payload based on length
-        let len = u32::decode(stream)? as usize;
+        let len = u32::decode(decoder)? as usize;
 
-        let result = str::from_utf8(&stream.payload()[stream.position()..stream.position() + len])
-            .unwrap()
-            .to_owned();
+        let result =
+            str::from_utf8(&decoder.payload()[decoder.position()..decoder.position() + len])
+                .unwrap()
+                .to_owned();
 
-        // Advance stream pointer past the value
-        // Returns UnexpectedEof if stream cannot advance
-        stream.advance(len)?;
+        // Advance decoder pointer past the value
+        // Returns UnexpectedEof if decoder cannot advance
+        decoder.advance(len)?;
 
         Ok(result)
     }
 
-    fn encode(self, sink: &mut Sink) {
+    fn encode(self, encoder: &mut Encoder) {
         let val = self;
         let len = val.len();
-        sink.push(len as u32);
-        sink.values_mut().extend_from_slice(&val.into_bytes());
+        encoder.push(len as u32);
+        encoder.values_mut().extend_from_slice(&val.into_bytes());
     }
 }
 
 impl AbiType for Request {
-    fn decode(stream: &mut Stream) -> Result<Self, Error> {
-        let handler_id = String::decode(stream)?;
-        let body = Vec::decode(stream)?;
+    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
+        let handler_id = String::decode(decoder)?;
+        let body = Vec::decode(decoder)?;
 
         let result = Request {
             handler_id: handler_id,
@@ -119,26 +120,26 @@ impl AbiType for Request {
         Ok(result)
     }
 
-    fn encode(self, sink: &mut Sink) {
+    fn encode(self, encoder: &mut Encoder) {
         // Push handler_id (Strinng) first
-        sink.push(self.handler_id);
+        encoder.push(self.handler_id);
 
         // Push body (Vec<u8>) as second value
-        sink.push(self.body);
+        encoder.push(self.body);
     }
 }
 
 impl AbiType for Response {
-    fn decode(stream: &mut Stream) -> Result<Self, Error> {
-        let body = Vec::decode(stream)?;
+    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
+        let body = Vec::decode(decoder)?;
 
         let result = Response { body: body };
 
         Ok(result)
     }
 
-    fn encode(self, sink: &mut Sink) {
+    fn encode(self, encoder: &mut Encoder) {
         // Push body (Vec<u8>) as only value
-        sink.push(self.body);
+        encoder.push(self.body);
     }
 }

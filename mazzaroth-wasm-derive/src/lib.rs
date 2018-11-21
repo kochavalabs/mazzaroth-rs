@@ -80,7 +80,6 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 				if function.ret_types.is_empty() {
 					Some(quote! {
 						#function_ident => {
-							let mut decoder = mazzaroth_wasm::Decoder::new(payload);
 							inner.#function_ident(
 								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 							);
@@ -90,7 +89,6 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 				} else {
 					Some(quote! {
 						#function_ident => {
-							let mut decoder = mazzaroth_wasm::Decoder::new(payload);
 							let result = inner.#function_ident(
 								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 							);
@@ -134,20 +132,17 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			}
 		}
 
-		impl<T: #name_ident> pwasm_abi::eth::EndpointInterface for #endpoint_ident<T> {
+		impl<T: #name_ident> mazzaroth_abi::ContractInterface for #endpoint_ident<T> {
 			#[allow(unused_mut)]
 			#[allow(unused_variables)]
 			fn execute(&mut self, payload: &[u8]) -> Vec<u8> {
 				let inner = &mut self.inner;
-				if payload.len() < 4 {
-					panic!("Invalid abi invoke");
-				}
-				let method_id = ((payload[0] as u32) << 24)
-					+ ((payload[1] as u32) << 16)
-					+ ((payload[2] as u32) << 8)
-					+ (payload[3] as u32);
 
-				let method_payload = &payload[4..];
+				// first decode stream from payload to use
+				// First param should be the string function name to call
+				let mut decoder = mazzaroth_wasm::Decoder::new(payload);
+
+				let method_id = decoder.pop::<String>().expect("argument decoding failed")
 
 				match method_id {
 					#(#functions,)*

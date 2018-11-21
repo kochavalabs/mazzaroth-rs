@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["jeffsimpson <jsimpson@kochava.com>"]
 
 [dependencies]
+mazzaroth-wasm-derive = { path = "mazzaroth-wasm-derive" }

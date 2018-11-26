@@ -7,7 +7,7 @@ pub use persistence::{get, store};
 
 // Contract trait and dispatch function for interacting with smart contracts.
 pub mod contract;
-pub use contract::{dispatch, Contract};
+pub use contract::{Arguments, ContractInterface};
 
 // Encoder and Decoder used for passing data between runtime
 // Can be used to create a custom AbiType.

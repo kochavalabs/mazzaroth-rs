@@ -56,9 +56,13 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 	// to call the contract functions
 	let contract_toks = tokenize_contract(&argument_name, &contract);
 
+	// Note: Imports are included in the generated module here
+	// So if types are added that can be used as function params or returns, they must be included.
 	Ok(quote! {
 		#contract // Automatically calls the quote::ToTokens function
 		mod #mod_name_ident {
+			extern crate mazzaroth_wasm;
+			use mazzaroth_wasm::{Request, Response};
 			use super::#contract_ident; // Provide access to the user contract
 			#contract_toks
 		}
@@ -131,7 +135,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			}
 		}
 
-		impl<T: #name_ident> mazzaroth_abi::ContractInterface for #endpoint_ident<T> {
+		impl<T: #name_ident> mazzaroth_wasm::ContractInterface for #endpoint_ident<T> {
 			#[allow(unused_mut)]
 			#[allow(unused_variables)]
 			fn execute(&mut self, payload: &[u8]) -> Vec<u8> {
@@ -141,7 +145,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 				// First param should be the string function name to call
 				let mut decoder = mazzaroth_wasm::Decoder::new(payload);
 
-				let method_id = decoder.pop::<String>().expect("argument decoding failed")
+				let method_id = decoder.pop::<String>().expect("argument decoding failed");
 
 				match method_id {
 					#(#functions,)*

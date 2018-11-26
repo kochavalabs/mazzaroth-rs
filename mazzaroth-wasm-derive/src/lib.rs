@@ -75,7 +75,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 		match *item {
 			TraitItem::Function(ref function) => {
 				let function_ident = &function.name;
-				let arg_types = &function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+				let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
 
 				if function.ret_types.is_empty() {
 					Some(quote! {
@@ -98,7 +98,6 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 						}
 					})
 				}
-
 			},
 			_ => None,
 		}

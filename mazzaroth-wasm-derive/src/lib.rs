@@ -79,11 +79,15 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 		match *item {
 			TraitItem::Function(ref function) => {
 				let function_ident = &function.name;
+
+				// Create a matchname string literal that matches name of function
+				let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
+
 				let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
 
 				if function.ret_types.is_empty() {
 					Some(quote! {
-						#function_ident => {
+						#match_name => {
 							inner.#function_ident(
 								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 							);
@@ -92,7 +96,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 					})
 				} else {
 					Some(quote! {
-						#function_ident => {
+						#match_name => {
 							let result = inner.#function_ident(
 								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 							);
@@ -146,10 +150,10 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 				let mut decoder = mazzaroth_wasm::Decoder::new(payload);
 
 				let method_id = decoder.pop::<String>().expect("argument decoding failed");
-
-				match method_id {
+				
+				match method_id.as_ref() {
 					#(#functions,)*
-					_ => panic!("Invalid method signature"),
+					_ => panic!("Invalid method name"),
 				}
 			}
 		}

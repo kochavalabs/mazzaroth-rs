@@ -7,7 +7,7 @@ pub use persistence::{get, store};
 
 // Contract trait and dispatch function for interacting with smart contracts.
 pub mod contract;
-pub use contract::{Arguments, ContractInterface};
+pub use contract::{arguments, ContractInterface};
 
 // Encoder and Decoder used for passing data between runtime
 // Can be used to create a custom AbiType.
@@ -38,7 +38,6 @@ pub trait AbiType: Sized {
 
 // Request and Response types used by Smart Contract funcs
 pub struct Request {
-    pub handler_id: String,
     pub body: Vec<u8>,
 }
 
@@ -46,14 +45,7 @@ pub struct Response {
     pub body: Vec<u8>,
 }
 
-/// Return a response to the runtime
-pub fn ret(response: Response) {
-    // encode the Response and send as bytes
-    let mut encoder = Encoder::new();
-
-    encoder.push(response);
-
-    let values = encoder.values();
-
+/// Return encoded bytes to the runtime
+pub fn ret(values: Vec<u8>) {
     unsafe { _ret(values.as_ptr(), values.len()) };
 }

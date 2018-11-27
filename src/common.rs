@@ -109,11 +109,9 @@ impl AbiType for String {
 
 impl AbiType for Request {
     fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
-        let handler_id = String::decode(decoder)?;
         let body = Vec::decode(decoder)?;
 
         let result = Request {
-            handler_id: handler_id,
             body: body,
         };
 
@@ -121,9 +119,6 @@ impl AbiType for Request {
     }
 
     fn encode(self, encoder: &mut Encoder) {
-        // Push handler_id (Strinng) first
-        encoder.push(self.handler_id);
-
         // Push body (Vec<u8>) as second value
         encoder.push(self.body);
     }

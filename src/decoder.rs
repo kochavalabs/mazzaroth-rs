@@ -19,7 +19,16 @@ impl<'a> Decoder<'a> {
 
     /// Pop next argument of known type
     pub fn pop<T: AbiType>(&mut self) -> Result<T, Error> {
-        T::decode(self)
+        // TODO: Check if type is a fixed length, else grab length first
+        let len_position = self.advance(4)?;
+        let slice = &self.payload[len_position..self.position()];
+        let len = u32::decode(slice.to_vec())?;
+
+        // Now grab bytes and advance equal to length
+        let bytes_position = self.advance(len as usize)?;
+        let bytes = &self.payload[bytes_position..self.position()];
+
+        T::decode(bytes.to_vec())
     }
 
     /// Current position for the decoder

@@ -59,10 +59,9 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 	// Note: Imports are included in the generated module here
 	// So if types are added that can be used as function params or returns, they must be included.
 	Ok(quote! {
-		#contract // Automatically calls the quote::ToTokens function
+		#contract
 		mod #mod_name_ident {
 			extern crate mazzaroth_wasm;
-			use mazzaroth_wasm::{Request, Response};
 			use super::#contract_ident; // Provide access to the user contract
 			#contract_toks
 		}

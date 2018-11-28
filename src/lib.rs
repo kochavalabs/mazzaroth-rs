@@ -30,10 +30,10 @@ pub enum Error {
 /// AbiType trait
 pub trait AbiType: Sized {
     /// Define how objects should be decoded.
-    fn decode(decoder: &mut Decoder) -> Result<Self, Error>;
+    fn decode(bytes: Vec<u8>) -> Result<Self, Error>;
 
     /// Define how objects should be encoded.
-    fn encode(self, encoder: &mut Encoder);
+    fn encode(self) ->  Vec<u8> ;
 }
 
 // Request and Response types used by Smart Contract funcs

@@ -2,12 +2,7 @@ use super::{AbiType, Decoder, Encoder, Error, Request, Response};
 use std::str;
 
 impl AbiType for u32 {
-    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
-        // Returns UnexpectedEof if decoder cannot advance
-        let previous_position = decoder.advance(4)?;
-
-        let slice = &decoder.payload()[previous_position..decoder.position()];
-
+    fn decode(slice: Vec<u8>) -> Result<Self, Error> {
         let result = (slice[0] as u32)
             + ((slice[1] as u32) << 8)
             + ((slice[2] as u32) << 16)
@@ -16,23 +11,19 @@ impl AbiType for u32 {
         Ok(result)
     }
 
-    fn encode(self, encoder: &mut Encoder) {
+    fn encode(self) -> Vec<u8>{
         let mut bytes = [0u8; 4];
         bytes[0] = self as u8;
         bytes[1] = (self >> 8) as u8;
         bytes[2] = (self >> 16) as u8;
         bytes[3] = (self >> 24) as u8;
-        encoder.values_mut().extend_from_slice(&bytes[..]);
+
+        bytes.to_vec()
     }
 }
 
 impl AbiType for u64 {
-    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
-        // Returns UnexpectedEof if decoder cannot advance
-        let previous_position = decoder.advance(8)?;
-
-        let slice = &decoder.payload()[previous_position..decoder.position()];
-
+    fn decode(slice: Vec<u8>) -> Result<Self, Error> {
         let result = (slice[0] as u64)
             + ((slice[1] as u64) << 8)
             + ((slice[2] as u64) << 16)
@@ -45,7 +36,7 @@ impl AbiType for u64 {
         Ok(result)
     }
 
-    fn encode(self, encoder: &mut Encoder) {
+    fn encode(self) -> Vec<u8> {
         let mut bytes = [0u8; 8];
         bytes[0] = self as u8;
         bytes[1] = (self >> 8) as u8;
@@ -56,85 +47,57 @@ impl AbiType for u64 {
         bytes[6] = (self >> 48) as u8;
         bytes[7] = (self >> 56) as u8;
 
-        encoder.values_mut().extend_from_slice(&bytes[..]);
+        bytes.to_vec()
     }
 }
 
 impl AbiType for Vec<u8> {
-    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
-        // First decode the length, then the rest of the payload based on length
-        let len = u32::decode(decoder)? as usize;
-
-        let result = decoder.payload()[decoder.position()..decoder.position() + len].to_vec();
-
-        // Advance decoder pointer past the value
-        // Returns UnexpectedEof if decoder cannot advance
-        decoder.advance(len)?;
-
-        Ok(result)
+    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
+        Ok(bytes)
     }
 
-    fn encode(self, encoder: &mut Encoder) {
-        let val = self;
-        let len = val.len();
-        encoder.push(len as u32);
-        encoder.values_mut().extend_from_slice(&val[..]);
+    fn encode(self) -> Vec<u8> {
+        self
     }
 }
 
 impl AbiType for String {
-    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
-        // First decode the length, then the rest of the payload based on length
-        let len = u32::decode(decoder)? as usize;
-
+    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
         let result =
-            str::from_utf8(&decoder.payload()[decoder.position()..decoder.position() + len])
+            str::from_utf8(&bytes)
                 .unwrap()
                 .to_owned();
-
-        // Advance decoder pointer past the value
-        // Returns UnexpectedEof if decoder cannot advance
-        decoder.advance(len)?;
 
         Ok(result)
     }
 
-    fn encode(self, encoder: &mut Encoder) {
-        let val = self;
-        let len = val.len();
-        encoder.push(len as u32);
-        encoder.values_mut().extend_from_slice(&val.into_bytes());
+    fn encode(self) -> Vec<u8> {
+        self.into_bytes()
     }
 }
 
 impl AbiType for Request {
-    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
-        let body = Vec::decode(decoder)?;
-
+    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
         let result = Request {
-            body: body,
+            body: bytes,
         };
 
         Ok(result)
     }
 
-    fn encode(self, encoder: &mut Encoder) {
-        // Push body (Vec<u8>) as second value
-        encoder.push(self.body);
+    fn encode(self) -> Vec<u8> {
+        self.body
     }
 }
 
 impl AbiType for Response {
-    fn decode(decoder: &mut Decoder) -> Result<Self, Error> {
-        let body = Vec::decode(decoder)?;
-
-        let result = Response { body: body };
+    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
+        let result = Response { body: bytes };
 
         Ok(result)
     }
 
-    fn encode(self, encoder: &mut Encoder) {
-        // Push body (Vec<u8>) as only value
-        encoder.push(self.body);
+    fn encode(self) -> Vec<u8> {
+        self.body
     }
 }

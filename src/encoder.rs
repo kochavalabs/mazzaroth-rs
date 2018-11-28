@@ -15,7 +15,14 @@ impl Encoder {
 
     /// Consume `val` to the Encoder
     pub fn push<T: AbiType>(&mut self, val: T) {
-        val.encode(self)
+        let bytes = val.encode();
+        // Push a u32 Length for each encoded item
+        // TODO: Check for fixed length items and don't include this (u32, u64, etc.)
+        let len = bytes.len() as u32;
+        self.values_mut().extend_from_slice(&len.encode());
+
+        // Append bytes after the length
+        self.values_mut().extend_from_slice(&bytes[..]);
     }
 
     /// Mutable reference to the Encoder vector

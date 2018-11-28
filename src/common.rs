@@ -11,7 +11,7 @@ impl AbiType for u32 {
         Ok(result)
     }
 
-    fn encode(self) -> Vec<u8>{
+    fn encode(self) -> Vec<u8> {
         let mut bytes = [0u8; 4];
         bytes[0] = self as u8;
         bytes[1] = (self >> 8) as u8;
@@ -63,10 +63,7 @@ impl AbiType for Vec<u8> {
 
 impl AbiType for String {
     fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
-        let result =
-            str::from_utf8(&bytes)
-                .unwrap()
-                .to_owned();
+        let result = str::from_utf8(&bytes).unwrap().to_owned();
 
         Ok(result)
     }
@@ -78,9 +75,7 @@ impl AbiType for String {
 
 impl AbiType for Request {
     fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
-        let result = Request {
-            body: bytes,
-        };
+        let result = Request { body: bytes };
 
         Ok(result)
     }

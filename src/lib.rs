@@ -33,7 +33,7 @@ pub trait AbiType: Sized {
     fn decode(bytes: Vec<u8>) -> Result<Self, Error>;
 
     /// Define how objects should be encoded.
-    fn encode(self) ->  Vec<u8> ;
+    fn encode(self) -> Vec<u8>;
 }
 
 // Request and Response types used by Smart Contract funcs

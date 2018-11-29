@@ -3,7 +3,7 @@ mod common;
 
 // Persistence provides get and store functions to use host DB
 pub mod persistence;
-pub use persistence::{get, store};
+pub use persistence::{get, store, get_bytes_key, store_bytes_key};
 
 // Contract trait and dispatch function for interacting with smart contracts.
 pub mod contract;

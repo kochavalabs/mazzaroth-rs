@@ -3,7 +3,7 @@ mod common;
 
 // Persistence provides get and store functions to use host DB
 pub mod persistence;
-pub use persistence::{get, store, get_bytes_key, store_bytes_key};
+pub use persistence::{get, get_bytes_key, store, store_bytes_key};
 
 // Contract trait and dispatch function for interacting with smart contracts.
 pub mod contract;
@@ -34,15 +34,6 @@ pub trait AbiType: Sized {
 
     /// Define how objects should be encoded.
     fn encode(self) -> Vec<u8>;
-}
-
-// Request and Response types used by Smart Contract funcs
-pub struct Request {
-    pub body: Vec<u8>,
-}
-
-pub struct Response {
-    pub body: Vec<u8>,
 }
 
 /// Return encoded bytes to the runtime

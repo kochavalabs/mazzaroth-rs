@@ -1,4 +1,4 @@
-use super::{AbiType, Decoder, Encoder, Error, Request, Response};
+use super::{AbiType, Decoder, Encoder, Error};
 use std::str;
 
 impl AbiType for u32 {
@@ -70,29 +70,5 @@ impl AbiType for String {
 
     fn encode(self) -> Vec<u8> {
         self.into_bytes()
-    }
-}
-
-impl AbiType for Request {
-    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
-        let result = Request { body: bytes };
-
-        Ok(result)
-    }
-
-    fn encode(self) -> Vec<u8> {
-        self.body
-    }
-}
-
-impl AbiType for Response {
-    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
-        let result = Response { body: bytes };
-
-        Ok(result)
-    }
-
-    fn encode(self) -> Vec<u8> {
-        self.body
     }
 }

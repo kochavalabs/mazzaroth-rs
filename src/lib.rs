@@ -9,6 +9,10 @@ pub use persistence::{get, get_bytes_key, store, store_bytes_key};
 pub mod contract;
 pub use contract::{arguments, ContractInterface};
 
+// Utils for converting values
+pub mod utils;
+pub use utils::{bytes_from_u32, bytes_to_u32};
+
 // Encoder and Decoder used for passing data between runtime
 // Can be used to create a custom AbiType.
 mod encoder;

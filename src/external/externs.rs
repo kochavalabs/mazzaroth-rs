@@ -23,4 +23,9 @@ extern "C" {
     /// Returns the length of the value associated with the key from the persistent DB.
     /// Use the return to set the capacity and length of a vector to call _get.
     pub(crate) fn _get_length(key: *const u8, key_length: usize) -> u32;
+
+
+
+    /// Function for testing host hash function
+    pub(crate) fn _get_key(data: *const u8, data_length: usize, hash: *mut u8);
 }

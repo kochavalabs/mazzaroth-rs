@@ -1,17 +1,15 @@
 // Define the custom AbiType implementations
 mod common;
 
-// Persistence provides get and store functions to use host DB
-pub mod persistence;
-pub use persistence::{get, get_bytes_key, store, store_bytes_key};
-
-// Contract trait and dispatch function for interacting with smart contracts.
-pub mod contract;
-pub use contract::{arguments, ContractInterface};
+// Contract trait definition
+mod contract;
+pub use contract::ContractInterface;
 
 // Utils for converting values
 pub mod utils;
-pub use utils::{bytes_from_u32, bytes_to_u32};
+
+// Crypto for Sha3 256 hashing
+pub mod crypto;
 
 // Encoder and Decoder used for passing data between runtime
 // Can be used to create a custom AbiType.
@@ -21,8 +19,7 @@ mod decoder;
 pub use decoder::Decoder;
 
 // externals are used in this crate to interact with runtime
-mod external;
-pub(crate) use external::*;
+pub mod external;
 
 /// Error for decoding rust types from decoder
 #[derive(Debug, PartialEq, Eq)]
@@ -38,9 +35,4 @@ pub trait AbiType: Sized {
 
     /// Define how objects should be encoded.
     fn encode(self) -> Vec<u8>;
-}
-
-/// Return encoded bytes to the runtime
-pub fn ret(values: Vec<u8>) {
-    unsafe { _ret(values.as_ptr(), values.len()) };
 }

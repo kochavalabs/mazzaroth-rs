@@ -1,5 +1,3 @@
-
-
 pub fn bytes_from_u32(value: u32) -> Vec<u8> {
     let mut value_bytes = [0u8; 4];
     value_bytes[0] = value as u8;

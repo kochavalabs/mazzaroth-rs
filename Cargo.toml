@@ -5,3 +5,4 @@ authors = ["jeffsimpson <jsimpson@kochava.com>"]
 
 [dependencies]
 mazzaroth-wasm-derive = { path = "mazzaroth-wasm-derive" }
+sha3 = "0.8.1"

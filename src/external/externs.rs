@@ -9,6 +9,15 @@ extern "C" {
     /// Use the return to set the capacity and length of a vector to call _fetch_input.
     pub(crate) fn _input_length() -> u32;
 
+    /// Fetches sender from the Runtime.
+    /// Parameter sender should be the mut pointer to a vector with length and capacity allocated.
+    /// Call _input_length first to get a length used to allocate the input vector.
+    pub(crate) fn _fetch_sender(sender: *mut u8);
+
+    /// Returns the length of sender from the runtime.
+    /// Use the return to set the capacity and length of a vector to call _fetch_sender.
+    pub(crate) fn _sender_length() -> u32;
+
     /// Returns ptr to bytes to the runtime if a call needs to return a value.
     pub(crate) fn _ret(bytes: *const u8, bytes_length: usize);
 
@@ -23,8 +32,6 @@ extern "C" {
     /// Returns the length of the value associated with the key from the persistent DB.
     /// Use the return to set the capacity and length of a vector to call _get.
     pub(crate) fn _get_length(key: *const u8, key_length: usize) -> u32;
-
-
 
     /// Function for testing host hash function
     pub(crate) fn _get_key(data: *const u8, data_length: usize, hash: *mut u8);

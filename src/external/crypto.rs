@@ -1,4 +1,4 @@
-use super::externs::{_get_key};
+use super::externs::_get_key;
 
 /// Calls a host function to Sha3_256 data and return the hash
 pub fn sha256(data: Vec<u8>) -> Vec<u8> {

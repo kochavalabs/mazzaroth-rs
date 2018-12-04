@@ -1,4 +1,4 @@
-use super::externs::{_input_length, _fetch_input, _ret, _sender_length, _fetch_sender};
+use super::externs::{_fetch_input, _fetch_sender, _input_length, _ret, _sender_length};
 
 /// Get the arguments encoded from the Runtime
 pub fn arguments() -> Vec<u8> {

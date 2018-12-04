@@ -14,9 +14,9 @@ pub fn bytes_to_u32(value: Vec<u8>) -> u32 {
     let mut num = 0;
     if value.len() >= 4 {
         num = (value[0] as u32)
-        + ((value[1] as u32) << 8)
-        + ((value[2] as u32) << 16)
-        + ((value[3] as u32) << 24);
+            + ((value[1] as u32) << 8)
+            + ((value[2] as u32) << 16)
+            + ((value[3] as u32) << 24);
     }
 
     num

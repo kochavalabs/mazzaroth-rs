@@ -1,4 +1,4 @@
-use super::{AbiType, Decoder, Encoder, Error};
+use super::{AbiType, Error};
 use std::str;
 
 impl AbiType for u32 {

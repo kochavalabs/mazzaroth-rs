@@ -1,3 +1,5 @@
+#![feature(test)]
+
 // Define the custom AbiType implementations
 mod common;
 

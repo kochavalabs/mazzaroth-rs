@@ -34,5 +34,5 @@ extern "C" {
     pub(crate) fn _get_length(key: *const u8, key_length: usize) -> u32;
 
     /// Function for testing host hash function
-    pub(crate) fn _get_key(data: *const u8, data_length: usize, hash: *mut u8);
+    pub(crate) fn _sha256(data: *const u8, data_length: usize, hash: *mut u8);
 }

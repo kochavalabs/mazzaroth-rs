@@ -23,6 +23,9 @@ pub use decoder::Decoder;
 // externals are used in this crate to interact with runtime
 pub mod external;
 
+#[macro_use]
+extern crate cfg_if;
+
 /// Error for decoding rust types from decoder
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {

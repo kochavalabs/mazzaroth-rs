@@ -35,4 +35,7 @@ extern "C" {
 
     /// Function for testing host hash function
     pub(crate) fn _sha256(data: *const u8, data_length: usize, hash: *mut u8);
+
+    /// Return error messages to the host runtime
+    pub(crate) fn _error(msg: String);
 }

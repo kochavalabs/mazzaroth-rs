@@ -1,11 +1,11 @@
-use super::externs::_error;
+use super::externs::_log_error;
 
 use std::panic;
 
 cfg_if! {
     if #[cfg(target_arch = "wasm32")] {
         fn hook_impl(info: &panic::PanicInfo) {
-            unsafe { _error(info.to_string()) };
+            unsafe { _log_error(info.to_string()) };
         }
     } else {
         use std::io::{self, Write};

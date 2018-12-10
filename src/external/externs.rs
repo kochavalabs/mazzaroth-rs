@@ -37,5 +37,7 @@ extern "C" {
     pub(crate) fn _sha256(data: *const u8, data_length: usize, hash: *mut u8);
 
     /// Return error messages to the host runtime
-    pub(crate) fn _error(msg: String);
+    pub(crate) fn _log_error(msg: String);
+
+    pub(crate) fn _log(msg: String);
 }

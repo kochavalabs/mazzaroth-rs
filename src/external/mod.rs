@@ -8,7 +8,5 @@ pub mod transaction;
 
 pub mod errors;
 
-// public log function that wraps the host call
-pub fn log(msg: String) {
-    unsafe { externs::_log(msg) }
-}
+mod log;
+pub use self::log::log;

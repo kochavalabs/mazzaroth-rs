@@ -1,8 +1,8 @@
-use super::{AbiType, Error};
+use super::{AbiError, AbiType};
 use std::str;
 
 impl AbiType for u32 {
-    fn decode(slice: Vec<u8>) -> Result<Self, Error> {
+    fn decode(slice: Vec<u8>) -> Result<Self, AbiError> {
         let result = (slice[0] as u32)
             + ((slice[1] as u32) << 8)
             + ((slice[2] as u32) << 16)
@@ -23,7 +23,7 @@ impl AbiType for u32 {
 }
 
 impl AbiType for u64 {
-    fn decode(slice: Vec<u8>) -> Result<Self, Error> {
+    fn decode(slice: Vec<u8>) -> Result<Self, AbiError> {
         let result = (slice[0] as u64)
             + ((slice[1] as u64) << 8)
             + ((slice[2] as u64) << 16)
@@ -52,7 +52,7 @@ impl AbiType for u64 {
 }
 
 impl AbiType for Vec<u8> {
-    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
+    fn decode(bytes: Vec<u8>) -> Result<Self, AbiError> {
         Ok(bytes)
     }
 
@@ -62,7 +62,7 @@ impl AbiType for Vec<u8> {
 }
 
 impl AbiType for String {
-    fn decode(bytes: Vec<u8>) -> Result<Self, Error> {
+    fn decode(bytes: Vec<u8>) -> Result<Self, AbiError> {
         let result = str::from_utf8(&bytes).unwrap().to_owned();
 
         Ok(result)

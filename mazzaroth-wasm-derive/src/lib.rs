@@ -17,6 +17,9 @@ mod error;
 use error::{Result,ProcError};
 
 
+/// mazzaroth_abi
+/// args will contain the name of the contract provided
+/// input is the full trait code provided
 #[proc_macro_attribute]
 pub fn mazzaroth_abi(args: TokenStream, input: TokenStream) -> TokenStream {
 	let args_toks = parse_macro_input!(args as syn::AttributeArgs);
@@ -24,7 +27,7 @@ pub fn mazzaroth_abi(args: TokenStream, input: TokenStream) -> TokenStream {
 
 	let output = match impl_mazzaroth_abi(args_toks, input_toks) {
 		Ok(output) => output,
-		Err(err) => panic!("roth_abi encountered error: {}", err),
+		Err(err) => panic!("mazzaroth_abi encountered error: {}", err),
 	};
 
 	output.into()
@@ -49,7 +52,7 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 	let contract_ident = syn::Ident::new(contract.name(), Span::call_site());
 
 	// Mod that is created around contract trait
-	let mod_name = format!("roth_abi_impl_{}", &contract.name().clone());
+	let mod_name = format!("mazzaroth_abi_impl_{}", &contract.name().clone());
 	let mod_name_ident = syn::Ident::new(&mod_name, Span::call_site());
 
 	// Tokenize the contract which will have a single entry

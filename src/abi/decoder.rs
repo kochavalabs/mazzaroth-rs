@@ -1,4 +1,4 @@
-use super::{AbiType, Error};
+use super::{AbiError, AbiType};
 
 /// Decode a payload of bytes.
 /// Values are expected to be encoded AbiTypes that are
@@ -18,7 +18,7 @@ impl<'a> Decoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: AbiType>(&mut self) -> Result<T, Error> {
+    pub fn pop<T: AbiType>(&mut self) -> Result<T, AbiError> {
         // TODO: Check if type is a fixed length, else grab length first
         let len_position = self.advance(4)?;
         let slice = &self.payload[len_position..self.position()];
@@ -37,9 +37,9 @@ impl<'a> Decoder<'a> {
     }
 
     /// Advance decoder position for `amount` bytes
-    pub fn advance(&mut self, amount: usize) -> Result<usize, Error> {
+    pub fn advance(&mut self, amount: usize) -> Result<usize, AbiError> {
         if self.position + amount > self.payload.len() {
-            return Err(Error::UnexpectedEof);
+            return Err(AbiError::UnexpectedEof);
         }
 
         let old_position = self.position;

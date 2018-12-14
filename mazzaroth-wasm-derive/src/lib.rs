@@ -39,7 +39,7 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 		return Err(ProcError::invalid_arguments(args.len()));
 	}
 
-	// Get the contract name passed as an argument to the roth_abi macro
+	// Get the contract name passed as an argument to the mazzaroth_abi macro
 	let argument_name = 
 		if let syn::NestedMeta::Meta(syn::Meta::Word(ident)) = args.get(0).unwrap() {
 			Ok(ident.to_string())

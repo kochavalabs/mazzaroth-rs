@@ -1,0 +1,10 @@
+[package]
+name = "mazzaroth-wasm"
+version = "0.1.0"
+authors = ["jeffsimpson <jsimpson@kochava.com>"]
+
+[dependencies]
+mazzaroth-wasm-derive = { path = "mazzaroth-wasm-derive" }
+sha3 = "0.8.1"
+cfg-if = "0.1.3"
+wasm-bindgen = "0.2.20"

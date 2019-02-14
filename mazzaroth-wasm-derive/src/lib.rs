@@ -6,6 +6,9 @@ extern crate proc_macro2;
 extern crate syn;
 #[macro_use]
 extern crate quote;
+extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;
@@ -16,10 +19,12 @@ use contract::{Contract,TraitItem};
 mod error;
 use error::{Result,ProcError};
 
+mod json;
+use json::write_json_abi; 
 
 /// mazzaroth_abi
 /// args will contain the name of the contract provided
-/// input is the full trait code provided
+/// input is the full trait code provided 
 #[proc_macro_attribute]
 pub fn mazzaroth_abi(args: TokenStream, input: TokenStream) -> TokenStream {
 	let args_toks = parse_macro_input!(args as syn::AttributeArgs);
@@ -50,6 +55,9 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 
 	let contract = Contract::from_item(input);
 	let contract_ident = syn::Ident::new(contract.name(), Span::call_site());
+
+	// Write out a json abi for the functions available
+	write_json_abi(&contract)?;
 
 	// Mod that is created around contract trait
 	let mod_name = format!("mazzaroth_abi_impl_{}", &contract.name().clone());

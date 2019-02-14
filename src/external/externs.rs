@@ -33,8 +33,17 @@ extern "C" {
     /// Use the return to set the capacity and length of a vector to call _get.
     pub(crate) fn _get_length(key: *const u8, key_length: usize) -> u32;
 
-    /// Function for testing host hash function
+    /// Host hashing function: sha256
     pub(crate) fn _sha256(data: *const u8, data_length: usize, hash: *mut u8);
+
+    /// Host hashing function: sha3_256
+    pub(crate) fn _sha3_256(data: *const u8, data_length: usize, hash: *mut u8);
+
+    /// Host hashing function: keccak256
+    pub(crate) fn _keccak256(data: *const u8, data_length: usize, hash: *mut u8);
+
+    /// Host hashing function: shake256
+    pub(crate) fn _shake256(data: *const u8, data_length: usize, hash: *mut u8);
 
     /// Return error messages to the host runtime
     pub(crate) fn _log_error(msg: String);

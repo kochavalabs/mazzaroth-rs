@@ -39,6 +39,9 @@ extern "C" {
     /// Host hashing function: sha3_256
     pub(crate) fn _sha3_256(data: *const u8, data_length: usize, hash: *mut u8);
 
+    /// Host hashing function: sha3_512
+    pub(crate) fn _sha3_512(data: *const u8, data_length: usize, hash: *mut u8);
+
     /// Host hashing function: keccak256
     pub(crate) fn _keccak256(data: *const u8, data_length: usize, hash: *mut u8);
 

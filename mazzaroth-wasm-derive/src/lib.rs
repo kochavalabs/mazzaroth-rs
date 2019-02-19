@@ -73,8 +73,7 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 		#contract
 		mod #mod_name_ident {
 			extern crate mazzaroth_wasm;
-			use types::*; // Put defined ABITypes in this module
-			use super::#contract_ident; // Provide access to the user contract
+			use super::*; // Provide access to the user contract
 			#contract_toks
 		}
 		pub use self::#mod_name_ident::#argument_ident;

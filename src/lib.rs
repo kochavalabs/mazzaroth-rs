@@ -1,7 +1,7 @@
 #![feature(test)]
 
 // Define the custom AbiType implementations
-mod abi;
+pub mod abi;
 
 // Contract trait definition
 mod contract;

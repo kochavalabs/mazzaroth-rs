@@ -1,7 +1,11 @@
 use syn;
+use syn::Meta::{List, NameValue, Word};
+use syn::NestedMeta::{Literal, Meta};
+use syn::Ident;
 use quote;
 use proc_macro2::Span;
 use quote::TokenStreamExt; // Provides access to append_all for TokenStream
+use std::collections::HashMap;
 
 /// Contract is built from items passed to procedural macro
 /// and updated
@@ -25,6 +29,9 @@ pub struct Function {
 	pub arguments: Vec<(syn::Pat, syn::Type)>,
     // Return types for the function.
     pub ret_types: Vec<syn::Type>,
+
+    /// Codecs defined by tag with their encoding type
+    pub codec: HashMap<String, String>,
 }
 
 /// Item within the trait, but only care about Functions
@@ -68,11 +75,15 @@ impl TraitItem {
 				if method_trait_item.default.is_some() {
 					return TraitItem::Other(syn::TraitItem::Method(method_trait_item))
 				}
+
+                // Look for codec attrs
+                let codec = parse_attribute_codec(&method_trait_item.attrs);
 				
                 // Returns the TraitItem as sa new Function
                 TraitItem::Function(new_function(
                     method_trait_item.sig.ident.clone(),
                     method_trait_item.sig,
+                    codec,
                 ))
 			},
 			trait_item => TraitItem::Other(trait_item)
@@ -80,7 +91,56 @@ impl TraitItem {
 	}
 }
 
-fn new_function(name: syn::Ident, method_sig: syn::MethodSig) -> Function {
+fn parse_attribute_codec(attrs: &[syn::Attribute]) -> HashMap<String, String> {
+    let mut codec = HashMap::new();
+    for meta_items in attrs.iter().filter_map(get_mazzaroth_meta_items) {
+        for meta_item in meta_items {
+            match meta_item {
+                // Parse `#[mazzaroth_codec({key1} = "{value1}", {key2} = "{value2}"))]`
+                Meta(NameValue(ref m)) => {
+                    let s = get_lit_str(&m.ident, &m.lit);
+                    // println!("Name of key {}, value {}", m.ident, s.value());
+                    codec.insert(m.ident.to_string(), s.value());
+                }
+                Meta(ref meta_item) => {
+                    panic!("unknown variant in mazzaroth_codec attribute `{}`", meta_item.name());
+                }
+
+                Literal(ref _lit) => {
+                    panic!("unexpected literal in mazzaroth_codec attribute");
+                }
+            }
+        }
+    }
+    codec
+}
+
+fn get_mazzaroth_meta_items(attr: &syn::Attribute) -> Option<Vec<syn::NestedMeta>> {
+    if attr.path.segments.len() == 1 && attr.path.segments[0].ident == "mazzaroth_codec" {
+        match attr.interpret_meta() {
+            Some(List(ref meta)) => {
+                Some(meta.nested.iter().cloned().collect())
+            },
+            _ => {
+                // TODO: produce an error?
+                None
+            }
+        }
+    } else {
+        None
+    }
+}
+
+fn get_lit_str<'a>(attr_name: &Ident, lit: &'a syn::Lit) -> &'a syn::LitStr {
+    if let syn::Lit::Str(ref lit) = *lit {
+        lit
+    } else {
+        panic!("expected mazzaroth_codec attribute to be a string: `{} = \"...\"`",
+                attr_name)
+    }
+}
+
+fn new_function(name: syn::Ident, method_sig: syn::MethodSig, codec: HashMap<String, String>) -> Function {
     // Get arguments from method sig
     let arguments: Vec<(syn::Pat, syn::Type)> = iter_signature(&method_sig).collect();
 
@@ -102,6 +162,7 @@ fn new_function(name: syn::Ident, method_sig: syn::MethodSig) -> Function {
         method_sig: method_sig,
         arguments: arguments,
         ret_types: ret_types,
+        codec: codec,
     }
 }
 

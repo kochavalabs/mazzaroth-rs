@@ -112,6 +112,7 @@ pub struct Argument {
     pub name: String,
     #[serde(rename = "type")]
     pub type_: String,
+    pub codec: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -149,16 +150,30 @@ impl<'a> From<&'a contract::Function> for FunctionEntry {
                     Argument {
                         name: quote! { #pat }.to_string(),
                         type_: canonicalize_type(ty),
+                        codec: check_codec(item, ty),
                     }
                 )
                 .collect(),
             outputs: item.ret_types
                 .iter()
                 .enumerate()
-                .map(|(idx, ty)| Argument { name: format!("returnValue{}", idx), type_: canonicalize_type(ty) })
+                .map(|(idx, ty)| Argument { 
+						name: format!("returnValue{}", idx), 
+						type_: canonicalize_type(ty), 
+						codec: check_codec(item, ty),
+					},)
                 .collect(),
         }
     }
+}
+
+// Return the codec value for the type, or "bytes"
+fn check_codec(item: &contract::Function, ty: &syn::Type) -> String {
+	if let Some(value) = item.codec.get(&canonicalize_type(ty)) {
+		value.to_string()
+	} else {
+		"bytes".to_string()
+	}
 }
 
 fn push_int_const_expr(target: &mut String, expr: &syn::Expr) {

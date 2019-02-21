@@ -6,13 +6,12 @@ use self::sha3::{Digest, Sha3_256};
 /// Returns the sha256 hash applied to the supplied data
 /// Currently faster to use host implementation
 /// Needs optimaztion on VM side
-/*
+#[allow(dead_code)]
 fn sha256(data: Vec<u8>) -> Vec<u8> {
     let hash = Sha3_256::digest(&data);
 
     hash.to_vec()
 }
-*/
 
 #[cfg(test)]
 mod tests {

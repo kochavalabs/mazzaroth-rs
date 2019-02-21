@@ -1,5 +1,5 @@
 use syn;
-use syn::Meta::{List, NameValue, Word};
+use syn::Meta::{List, NameValue};
 use syn::NestedMeta::{Literal, Meta};
 use syn::Ident;
 use quote;

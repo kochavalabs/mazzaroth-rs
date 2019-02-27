@@ -8,6 +8,9 @@ pub mod types;
 pub enum AbiError {
     /// Unexpected end of the decoder
     UnexpectedEof,
+
+    /// Bad format
+    BadFormat
 }
 
 /// AbiType trait

@@ -115,5 +115,5 @@ pub fn validate_signature(pub_key: Vec<u8>, message: Vec<u8>, signature: Vec<u8>
             signature.as_ptr(),
         )
     };
-    result != 0
+    result
 }

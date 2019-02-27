@@ -104,7 +104,9 @@ pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'st
 /// from that user.
 /// We are currently using a 64 byte P256 elliptic curve public key and a 64
 /// byte signature string.
-pub fn validate_signature(pub_key: Vec<u8>, message: Vec<u8>, signature: Vec<u8>) -> bool {
+/// 0 = False
+/// 1 = True
+pub fn validate_signature(pub_key: Vec<u8>, message: Vec<u8>, signature: Vec<u8>) -> u32 {
     let result = unsafe {
         _validate_signature(
             pub_key.as_ptr(),

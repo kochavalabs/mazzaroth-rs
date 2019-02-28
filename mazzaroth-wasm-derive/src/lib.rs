@@ -54,7 +54,6 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 	let argument_ident = syn::Ident::new(&argument_name, Span::call_site());
 
 	let contract = Contract::from_item(input);
-	let contract_ident = syn::Ident::new(contract.name(), Span::call_site());
 
 	// Write out a json abi for the functions available
 	write_json_abi(&contract)?;

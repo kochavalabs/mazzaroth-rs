@@ -3,6 +3,9 @@ use super::externs::{
     _validate_signature,
 };
 
+const PRIVATE_KEY_LENGTH: usize = 32;
+const PUBLIC_KEY_LENGTH: usize = 64;
+
 /// Calls a host function to Sha256 data and return the hash
 pub fn sha256(data: Vec<u8>) -> Vec<u8> {
     // Create Vec to store hash
@@ -81,6 +84,9 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
 /// It uses a 32 byte P256 elliptic curve private key and returns a 64 byte
 /// signature.
 pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'static str> {
+    if priv_key.len() != PRIVATE_KEY_LENGTH {
+        return Err("Incorrect private key length.");
+    }
     let mut signature = Vec::with_capacity(64 as usize);
     unsafe { signature.set_len(64 as usize) };
 
@@ -107,6 +113,9 @@ pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'st
 /// 0 = False
 /// 1 = True
 pub fn validate_signature(pub_key: Vec<u8>, message: Vec<u8>, signature: Vec<u8>) -> u32 {
+    if pub_key.len() != PUBLIC_KEY_LENGTH {
+        return 0;
+    }
     let result = unsafe {
         _validate_signature(
             pub_key.as_ptr(),

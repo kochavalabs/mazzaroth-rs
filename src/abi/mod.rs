@@ -4,13 +4,13 @@ pub mod encoder;
 pub mod types;
 
 /// Error for decoding rust types from decoder
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum AbiError {
     /// Unexpected end of the decoder
     UnexpectedEof,
 
     /// Bad format
-    BadFormat
+    BadFormat,
 }
 
 /// AbiType trait

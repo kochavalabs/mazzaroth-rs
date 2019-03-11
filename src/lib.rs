@@ -1,10 +1,5 @@
 #![feature(test)]
 
-extern crate serde;
-
-#[macro_use]
-extern crate serde_derive;
-
 // Define the custom AbiType implementations
 pub mod abi;
 

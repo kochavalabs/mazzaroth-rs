@@ -10,7 +10,7 @@ pub enum AbiError {
     UnexpectedEof,
 
     /// Bad format
-    BadFormat
+    BadFormat,
 }
 
 /// AbiType trait

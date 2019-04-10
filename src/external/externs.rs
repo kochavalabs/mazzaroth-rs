@@ -49,14 +49,14 @@ extern "C" {
     pub(crate) fn _shake256(data: *const u8, data_length: usize, hash: *mut u8);
 
     /// Host hashing function for generating a cryptographic key pair.
-    /// Currently returns a P256 elliptic curve key pair, 32byte private key
-    /// and 64 byte public key
+    /// Currently returns a X25519 elliptic curve key pair, 32 byte private key
+    /// and 32 byte public key
     pub(crate) fn _generate_key_pair(priv_key: *mut u8, pub_key: *mut u8);
 
     /// Signs a message using the provided private key. You typically wouldn't be
     /// signing something by sending your private key to the network, so this is
     /// mostly for demonstration purposes.
-    /// It uses a 32 byte P256 elliptic curve private key and returns a 64 byte
+    /// It uses a 32 byte X25519 elliptic curve private key and returns a 64 byte
     /// signature.
     pub(crate) fn _sign_message(
         priv_key: *const u8,
@@ -68,7 +68,7 @@ extern "C" {
     /// Validates a signature using the provided public key. A Mazzaroth user's
     /// account address can be used as the public key to verify transactions sent
     /// from that user.
-    /// We are currently using a 64 byte P256 elliptic curve public key and a 64
+    /// We are currently using a 32 byte X25519 elliptic curve public key and a 64
     /// byte signature string.
     pub(crate) fn _validate_signature(
         pub_key: *const u8,

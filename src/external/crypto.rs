@@ -4,7 +4,7 @@ use super::externs::{
 };
 
 const PRIVATE_KEY_LENGTH: usize = 32;
-const PUBLIC_KEY_LENGTH: usize = 64;
+const PUBLIC_KEY_LENGTH: usize = 32;
 
 /// Calls a host function to Sha256 data and return the hash
 pub fn sha256(data: Vec<u8>) -> Vec<u8> {
@@ -62,13 +62,13 @@ pub fn shake256(data: Vec<u8>) -> Vec<u8> {
 }
 
 /// Host hashing function for generating a cryptographic key pair.
-/// Currently returns a P256 elliptic curve key pair, 32byte private key
-/// and 64 byte public key
+/// Currently returns a X25519 elliptic curve key pair, 32 byte private key
+/// and 32 byte public key
 pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
     let mut priv_key = Vec::with_capacity(32 as usize);
-    let mut pub_key = Vec::with_capacity(64 as usize);
+    let mut pub_key = Vec::with_capacity(32 as usize);
     unsafe { priv_key.set_len(32 as usize) };
-    unsafe { pub_key.set_len(64 as usize) };
+    unsafe { pub_key.set_len(32 as usize) };
 
     unsafe { _generate_key_pair(priv_key.as_mut_ptr(), pub_key.as_mut_ptr()) };
 
@@ -81,7 +81,7 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
 /// Signs a message using the provided private key. You typically wouldn't be
 /// signing something by sending your private key to the network, so this is
 /// mostly for demonstration purposes.
-/// It uses a 32 byte P256 elliptic curve private key and returns a 64 byte
+/// It uses a 32 byte X25519 elliptic curve private key and returns a 64 byte
 /// signature.
 pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'static str> {
     if priv_key.len() != PRIVATE_KEY_LENGTH {
@@ -108,7 +108,7 @@ pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'st
 /// Validates a signature using the provided public key. A Mazzaroth user's
 /// account address can be used as the public key to verify transactions sent
 /// from that user.
-/// We are currently using a 64 byte P256 elliptic curve public key and a 64
+/// We are currently using a 32 byte X25519 elliptic curve public key and a 64
 /// byte signature string.
 /// 0 = False
 /// 1 = True

@@ -1,4 +1,4 @@
-use super::externs::{_fetch_input, _fetch_sender, _input_length, _ret, _sender_length};
+use super::externs::{_fetch_input, _fetch_sender, _input_length, _ret, PUBLIC_KEY_LENGTH};
 
 /// Get the arguments encoded from the Runtime
 pub fn arguments() -> Vec<u8> {
@@ -18,10 +18,9 @@ pub fn ret(values: Vec<u8>) {
 }
 
 pub fn sender() -> Vec<u8> {
-    let length = unsafe { _sender_length() };
-    let mut args: Vec<u8> = Vec::with_capacity(length as usize);
+    let mut args: Vec<u8> = Vec::with_capacity(PUBLIC_KEY_LENGTH);
     unsafe {
-        args.set_len(length as usize);
+        args.set_len(PUBLIC_KEY_LENGTH);
         _fetch_sender(args.as_mut_ptr());
     }
 

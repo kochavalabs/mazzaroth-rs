@@ -1,10 +1,7 @@
 use super::externs::{
     _generate_key_pair, _keccak256, _sha256, _sha3_256, _sha3_512, _shake256, _sign_message,
-    _validate_signature,
+    _validate_signature, PRIVATE_KEY_LENGTH, PUBLIC_KEY_LENGTH
 };
-
-const PRIVATE_KEY_LENGTH: usize = 32;
-const PUBLIC_KEY_LENGTH: usize = 32;
 
 /// Calls a host function to Sha256 data and return the hash
 pub fn sha256(data: Vec<u8>) -> Vec<u8> {

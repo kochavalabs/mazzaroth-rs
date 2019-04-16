@@ -1,3 +1,6 @@
+pub const PRIVATE_KEY_LENGTH: usize = 32;
+pub const PUBLIC_KEY_LENGTH: usize = 32;
+
 #[no_mangle]
 extern "C" {
     /// Fetches input from the Runtime.
@@ -13,10 +16,6 @@ extern "C" {
     /// Parameter sender should be the mut pointer to a vector with length and capacity allocated.
     /// Call _input_length first to get a length used to allocate the input vector.
     pub(crate) fn _fetch_sender(sender: *mut u8);
-
-    /// Returns the length of sender from the runtime.
-    /// Use the return to set the capacity and length of a vector to call _fetch_sender.
-    pub(crate) fn _sender_length() -> u32;
 
     /// Returns ptr to bytes to the runtime if a call needs to return a value.
     pub(crate) fn _ret(bytes: *const u8, bytes_length: usize);

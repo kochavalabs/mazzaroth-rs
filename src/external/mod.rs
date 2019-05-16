@@ -1,5 +1,7 @@
 pub mod externs;
 
+pub mod account;
+
 pub mod persistence;
 
 pub mod crypto;

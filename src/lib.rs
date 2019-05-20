@@ -7,8 +7,6 @@ pub mod abi;
 mod contract;
 pub use contract::ContractInterface;
 
-pub mod util;
-
 // Crypto for Sha3 256 hashing
 pub mod crypto;
 

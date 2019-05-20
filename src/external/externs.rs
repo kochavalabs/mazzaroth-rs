@@ -32,6 +32,26 @@ extern "C" {
     /// Use the return to set the capacity and length of a vector to call _get.
     pub(crate) fn _get_length(key: *const u8, key_length: usize) -> u32;
 
+    /// Get an account name from the persistent DB provided by the runtime.
+    /// Parameter value should be the mut pointer to a vector with length and capacity allocated.
+    /// Call _get_account_name_length first to get a length to allocate the value vector.
+    pub(crate) fn _get_account_name(key: *const u8, key_length: usize, value: *mut u8);
+
+    /// Set an account name in the persistent DB provided by the runtime.
+    pub(crate) fn _set_account_name(key: *const u8, key_length: usize, value: *const u8, value_length: usize);
+
+    /// Returns the length of the name associated with the account key from the persistent DB.
+    /// Use the return to set the capacity and length of a vector to call _get_account_name.
+    pub(crate) fn _get_account_name_length(key: *const u8, key_length: usize) -> u32;
+
+    /// Get the account balance from the persistent DB provided by the runtime.
+    /// Key should be the address of an account and a u64 value is returned.
+    pub(crate) fn _get_account_balance(key: *const u8, key_length: usize) -> u64;
+
+    /// Set the account balance in the persistent DB provided by the runtime.
+    /// Key should be the address of an account.
+    pub(crate) fn _set_account_balance(key: *const u8, key_length: usize, new_balance: u64);
+
     /// Host hashing function: sha256
     pub(crate) fn _sha256(data: *const u8, data_length: usize, hash: *mut u8);
 

@@ -1,4 +1,5 @@
-use super::AbiType;
+use rust_xdr::ser::to_bytes;
+use serde::ser::Serialize;
 
 /// Encoder for returning a number of arguments.
 /// To push a value to the encoder it must implement
@@ -14,12 +15,13 @@ impl Encoder {
     }
 
     /// Consume `val` to the Encoder
-    pub fn push<T: AbiType>(&mut self, val: T) {
-        let bytes = val.encode();
+    pub fn push<T: Serialize>(&mut self, val: T) {
+        let bytes = to_bytes(&val).unwrap();
         // Push a u32 Length for each encoded item
         // TODO: Check for fixed length items and don't include this (u32, u64, etc.)
         let len = bytes.len() as u32;
-        self.values_mut().extend_from_slice(&len.encode());
+        self.values_mut()
+            .extend_from_slice(&to_bytes(&len).unwrap());
 
         // Append bytes after the length
         self.values_mut().extend_from_slice(&bytes[..]);

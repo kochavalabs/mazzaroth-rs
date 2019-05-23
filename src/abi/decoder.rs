@@ -1,4 +1,6 @@
-use super::{AbiError, AbiType};
+use rust_xdr::de::from_bytes;
+use rust_xdr::error::Error;
+use serde::de::Deserialize;
 
 /// Decode a payload of bytes.
 /// Values are expected to be encoded AbiTypes that are
@@ -18,17 +20,17 @@ impl<'a> Decoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: AbiType>(&mut self) -> Result<T, AbiError> {
+    pub fn pop<T: Deserialize<'a>>(&mut self) -> Result<T, Error> {
         // TODO: Check if type is a fixed length, else grab length first
         let len_position = self.advance(4)?;
         let slice = &self.payload[len_position..self.position()];
-        let len = u32::decode(slice.to_vec())?;
+        let len = from_bytes::<u32>(slice)?;
 
         // Now grab bytes and advance equal to length
         let bytes_position = self.advance(len as usize)?;
         let bytes = &self.payload[bytes_position..self.position()];
 
-        T::decode(bytes.to_vec())
+        from_bytes(bytes)
     }
 
     /// Current position for the decoder
@@ -37,9 +39,9 @@ impl<'a> Decoder<'a> {
     }
 
     /// Advance decoder position for `amount` bytes
-    pub fn advance(&mut self, amount: usize) -> Result<usize, AbiError> {
+    pub fn advance(&mut self, amount: usize) -> Result<usize, Error> {
         if self.position + amount > self.payload.len() {
-            return Err(AbiError::UnexpectedEof);
+            return Err(Error::TrailingCharacters);
         }
 
         let old_position = self.position;

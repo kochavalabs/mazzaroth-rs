@@ -1,5 +1,6 @@
 /// Panic hook for host runtime that has a _log_error function defined.
 /// https://github.com/rustwasm/console_error_panic_hook
+#[cfg(target_arch = "wasm32")]
 use super::externs::_log_error;
 
 use std::panic;

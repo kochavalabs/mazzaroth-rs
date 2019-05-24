@@ -2,8 +2,8 @@ use rust_xdr::ser::to_bytes;
 use serde::ser::Serialize;
 
 /// Encoder for returning a number of arguments.
-/// To push a value to the encoder it must implement
-/// the AbiType trait for encoding.
+/// To push a value to the encoder it must implement the Serialize trait for
+/// encoding.
 pub struct Encoder {
     values: Vec<u8>,
 }

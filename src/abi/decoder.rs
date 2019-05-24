@@ -3,8 +3,7 @@ use rust_xdr::error::Error;
 use serde::de::Deserialize;
 
 /// Decode a payload of bytes.
-/// Values are expected to be encoded AbiTypes that are
-/// decoded when popped.
+/// Values are expected to be implement Deserialize to be properly popped.
 pub struct Decoder<'a> {
     payload: &'a [u8],
     position: usize,

@@ -20,3 +20,5 @@ pub mod external;
 
 #[macro_use]
 extern crate cfg_if;
+
+extern crate ex_dee;

@@ -1,5 +1,4 @@
-use rust_xdr::ser::to_bytes;
-use serde::ser::Serialize;
+use ex_dee::ser::XDROut;
 
 /// Encoder for returning a number of arguments.
 /// To push a value to the encoder it must implement the Serialize trait for
@@ -15,16 +14,18 @@ impl Encoder {
     }
 
     /// Consume `val` to the Encoder
-    pub fn push<T: Serialize>(&mut self, val: T) {
-        let bytes = to_bytes(&val).unwrap();
+    pub fn push<T: XDROut<Vec<u8>>>(&mut self, val: T) {
+        let mut val_bytes: Vec<u8> = Vec::new();
+        val.write_xdr(&mut val_bytes).unwrap();
         // Push a u32 Length for each encoded item
         // TODO: Check for fixed length items and don't include this (u32, u64, etc.)
-        let len = bytes.len() as u32;
-        self.values_mut()
-            .extend_from_slice(&to_bytes(&len).unwrap());
+        let len = val_bytes.len() as u32;
+        let mut len_bytes: Vec<u8> = Vec::new();
+        len.write_xdr(&mut len_bytes).unwrap();
+        self.values_mut().extend_from_slice(&len_bytes);
 
         // Append bytes after the length
-        self.values_mut().extend_from_slice(&bytes[..]);
+        self.values_mut().extend_from_slice(&val_bytes);
     }
 
     /// Mutable reference to the Encoder vector

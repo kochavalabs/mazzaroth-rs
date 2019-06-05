@@ -1,6 +1,5 @@
-use rust_xdr::de::from_bytes;
-use rust_xdr::error::Error;
-use serde::de::Deserialize;
+use ex_dee::de::XDRIn;
+use ex_dee::error::Error;
 
 /// Decode a payload of bytes.
 /// Values are expected to be implement Deserialize to be properly popped.
@@ -19,17 +18,17 @@ impl<'a> Decoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: Deserialize<'a>>(&mut self) -> Result<T, Error> {
+    pub fn pop<T: XDRIn<&'a [u8]>>(&mut self) -> Result<T, Error> {
         // TODO: Check if type is a fixed length, else grab length first
         let len_position = self.advance(4)?;
-        let slice = &self.payload[len_position..self.position()];
-        let len = from_bytes::<u32>(slice)?;
+        let mut slice = &self.payload[len_position..self.position()];
+        let len = u32::read_xdr(&mut slice)?.0;
 
         // Now grab bytes and advance equal to length
         let bytes_position = self.advance(len as usize)?;
-        let bytes = &self.payload[bytes_position..self.position()];
+        let mut bytes = &self.payload[bytes_position..self.position()];
 
-        from_bytes(bytes)
+        Ok(T::read_xdr(&mut bytes)?.0)
     }
 
     /// Current position for the decoder
@@ -40,7 +39,7 @@ impl<'a> Decoder<'a> {
     /// Advance decoder position for `amount` bytes
     pub fn advance(&mut self, amount: usize) -> Result<usize, Error> {
         if self.position + amount > self.payload.len() {
-            return Err(Error::TrailingCharacters);
+            return Err(Error::UnknownError);
         }
 
         let old_position = self.position;

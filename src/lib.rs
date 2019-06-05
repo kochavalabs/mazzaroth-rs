@@ -21,5 +21,4 @@ pub mod external;
 #[macro_use]
 extern crate cfg_if;
 
-extern crate rust_xdr;
-extern crate serde;
+extern crate ex_dee;

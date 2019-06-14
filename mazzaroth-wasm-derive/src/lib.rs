@@ -1,4 +1,4 @@
-#![recursion_limit="128"]
+#![recursion_limit="256"]
 
 extern crate proc_macro;
 extern crate proc_macro2;
@@ -116,6 +116,13 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 					})
 				}
 			},
+			_ => None,
+		}
+	}).collect();
+
+	// Same as above but only for Readonly functions
+	let readonly_functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
+		match *item {
 			TraitItem::Readonly(ref function) => {
 				let function_ident = &function.name;
 
@@ -185,14 +192,31 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 				let inner = &mut self.inner;
 
 				// first decode stream from payload to use
-				// First param should be the string function name to call
 				let mut decoder = mazzaroth_wasm::Decoder::new(payload);
+ 
+				// TODO: Define an XDR type to hold these fields (lifecycle, method_id, etc.) instead of individual encoding
 
-				let method_id = decoder.pop::<String>().expect("argument decoding failed");
-				
-				match method_id.as_ref() {
-					#(#functions,)*
-					_ => panic!("Invalid method name"),
+				// First param should be the lifecycle
+				let lifecycle = decoder.pop::<String>().expect("argument decoding failed");
+				match lifecycle.as_str() {
+					"call" => {
+						// Call executes a normal contract function (excludes readonly functions)
+						let method_id = decoder.pop::<String>().expect("argument decoding failed");
+						match method_id.as_str() {
+							#(#functions,)*
+							_ => panic!("Invalid non-readonly method name"),
+						}
+					},
+					"readonly" => {
+						// Readonly executes a function tagged with readonly
+						// First param should be the string function name to call
+						let method_id = decoder.pop::<String>().expect("argument decoding failed");
+						match method_id.as_str() {
+							#(#readonly_functions,)*
+							_ => panic!("Invalid readonly method name"),
+						}
+					},
+					_ => panic!("Invalid lifecycle name"),
 				}
 			}
 		}

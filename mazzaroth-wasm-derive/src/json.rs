@@ -116,10 +116,20 @@ pub struct Argument {
 }
 
 #[derive(Serialize, Debug)]
+pub struct ReadonlyEntry {
+	pub name: String,
+    #[serde(rename = "inputs")]
+    pub arguments: Vec<Argument>,
+	pub outputs: Vec<Argument>,
+}
+
+#[derive(Serialize, Debug)]
 #[serde(tag = "type")]
 pub enum AbiEntry {
     #[serde(rename = "function")]
     Function(FunctionEntry),
+	#[serde(rename = "readonly")]
+	Readonly(ReadonlyEntry),
 }
 
 #[derive(Serialize, Debug)]
@@ -132,6 +142,7 @@ impl<'a> From<&'a contract::Contract> for Abi {
             match *item {
                 // contract::Item::Event(ref event) => result.push(AbiEntry::Event(event.into())),
                 contract::TraitItem::Function(ref signature) => result.push(AbiEntry::Function(signature.into())),
+				contract::TraitItem::Readonly(ref signature) => result.push(AbiEntry::Readonly(signature.into())),
                 _ => {}
             }
         }
@@ -143,6 +154,33 @@ impl<'a> From<&'a contract::Contract> for Abi {
 impl<'a> From<&'a contract::Function> for FunctionEntry {
     fn from(item: &contract::Function) -> Self {
         FunctionEntry {
+            name: item.name.to_string(),
+            arguments: item.arguments
+                .iter()
+                .map(|&(ref pat, ref ty)|
+                    Argument {
+                        name: quote! { #pat }.to_string(),
+                        type_: canonicalize_type(ty),
+                        codec: check_codec(item, ty),
+                    }
+                )
+                .collect(),
+            outputs: item.ret_types
+                .iter()
+                .enumerate()
+                .map(|(idx, ty)| Argument { 
+						name: format!("returnValue{}", idx), 
+						type_: canonicalize_type(ty), 
+						codec: check_codec(item, ty),
+					},)
+                .collect(),
+        }
+    }
+}
+
+impl<'a> From<&'a contract::Function> for ReadonlyEntry {
+    fn from(item: &contract::Function) -> Self {
+        ReadonlyEntry {
             name: item.name.to_string(),
             arguments: item.arguments
                 .iter()

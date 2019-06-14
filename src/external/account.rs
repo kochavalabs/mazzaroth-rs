@@ -1,4 +1,4 @@
-use super::externs::{_get_account_name, _get_account_name_length, _set_account_name, _get_account_balance, _set_account_balance};
+use super::externs::{_get_account_name, _get_account_name_length, _set_account_name, _get_account_balance, _set_account_balance, _is_owner};
 use std::str;
 
 /// Get the value associated with a string key from the persistent storage for this runtime.
@@ -27,4 +27,10 @@ pub fn get_balance(key: Vec<u8>) -> u64 {
 /// Set the balance associate with an account in the persistent storage for this runtime.
 pub fn set_balance(key: Vec<u8>, balance: u64) {
     unsafe { _set_account_balance(key.as_ptr(), key.len(), balance) };
+}
+
+/// Check if an account is the owner of the contract.
+pub fn is_owner(key: Vec<u8>) -> bool {
+    let ret = unsafe { _is_owner(key.as_ptr(), key.len()) };
+    ret
 }

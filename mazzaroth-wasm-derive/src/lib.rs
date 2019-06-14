@@ -198,29 +198,3 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 		}
 	}
 }
-
-
-#[proc_macro_attribute]
-pub fn abi_json(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input = syn::parse_macro_input!(item as syn::DeriveInput);
-    let name = &input.ident;
-
-    let result = quote! {
-        #[derive(Serialize, Deserialize)]
-        #input
-
-        impl AbiType for #name {
-            fn decode(slice: Vec<u8>) -> Result<Self, AbiError> {
-                match serde_json::from_slice(slice.as_slice()) {
-                    Ok(result) => Ok(result),
-                    Err(e) => Err(AbiError::BadFormat),
-                }
-            }
-
-            fn encode(self) -> Vec<u8> {
-                serde_json::to_vec(&self).unwrap()
-            }
-        }
-    };
-    result.into()
-}

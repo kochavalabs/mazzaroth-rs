@@ -1,8 +1,8 @@
-use super::{AbiError, AbiType};
+use ex_dee::de::XDRIn;
+use ex_dee::error::Error;
 
 /// Decode a payload of bytes.
-/// Values are expected to be encoded AbiTypes that are
-/// decoded when popped.
+/// Values are expected to be implement Deserialize to be properly popped.
 pub struct Decoder<'a> {
     payload: &'a [u8],
     position: usize,
@@ -18,17 +18,17 @@ impl<'a> Decoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: AbiType>(&mut self) -> Result<T, AbiError> {
+    pub fn pop<T: XDRIn<&'a [u8]>>(&mut self) -> Result<T, Error> {
         // TODO: Check if type is a fixed length, else grab length first
         let len_position = self.advance(4)?;
-        let slice = &self.payload[len_position..self.position()];
-        let len = u32::decode(slice.to_vec())?;
+        let mut slice = &self.payload[len_position..self.position()];
+        let len = u32::read_xdr(&mut slice)?.0;
 
         // Now grab bytes and advance equal to length
         let bytes_position = self.advance(len as usize)?;
-        let bytes = &self.payload[bytes_position..self.position()];
+        let mut bytes = &self.payload[bytes_position..self.position()];
 
-        T::decode(bytes.to_vec())
+        Ok(T::read_xdr(&mut bytes)?.0)
     }
 
     /// Current position for the decoder
@@ -37,9 +37,9 @@ impl<'a> Decoder<'a> {
     }
 
     /// Advance decoder position for `amount` bytes
-    pub fn advance(&mut self, amount: usize) -> Result<usize, AbiError> {
+    pub fn advance(&mut self, amount: usize) -> Result<usize, Error> {
         if self.position + amount > self.payload.len() {
-            return Err(AbiError::UnexpectedEof);
+            return Err(Error::UnknownError);
         }
 
         let old_position = self.position;

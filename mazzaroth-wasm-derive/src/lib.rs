@@ -79,7 +79,20 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 	})
 }
 
+// Tokenize contract to an implementation with a callable execute function
+// TODO: Insert owenrship check for constructor?
 fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStream {
+
+	let constructor = contract.constructor().map(
+		|signature| {
+			let arg_types = signature.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+			quote! {
+				self.inner.constructor(
+					#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+				);
+			}
+		}
+	);
 
 	// Loop through the trait items of the contract and for Functions build a 
 	// quote map of function name to a function wrapper that gets arguments from encoded bytes
@@ -89,11 +102,9 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			TraitItem::Function(ref function) => {
 				let function_ident = &function.name;
 
-				// Don't include lifecycle functions in callable function list
+				// Don't include constructor in callable function list
 				match function_ident.to_string().as_ref() {
-					"update" => None,
-					"pause" => None,
-					"resume" => None,
+					"constructor" => None,
 					_ => {
 						// Create a matchname string literal that matches name of function
 						let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
@@ -134,11 +145,9 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			TraitItem::Readonly(ref function) => {
 				let function_ident = &function.name;
 
-				// Don't include lifecycle functions in callable function list
+				// Don't include constructor in callable function list
 				match function_ident.to_string().as_ref() {
-					"update" => None,
-					"pause" => None,
-					"resume" => None,
+					"constructor" => None,
 					_ => {
 
 						// Create a matchname string literal that matches name of function
@@ -233,19 +242,9 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 							_ => panic!("Invalid readonly method name"),
 						}
 					},
-					"update" => {
-						// Update executes the reserved update function, with no expected return so return
-						inner.update();
-						Vec::new()
-					},
-					"pause" => {
-						// Update executes the reserved update function, with no expected return so return
-						inner.update();
-						Vec::new()
-					},
-					"resume" => {
-						// Update executes the reserved update function, with no expected return so return
-						inner.update();
+					"constructor" => {
+						// Call the constructor with dynamic params
+						#constructor
 						Vec::new()
 					},
 					_ => panic!("Invalid lifecycle name"),

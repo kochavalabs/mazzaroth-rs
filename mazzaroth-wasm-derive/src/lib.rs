@@ -89,31 +89,39 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			TraitItem::Function(ref function) => {
 				let function_ident = &function.name;
 
-				// Create a matchname string literal that matches name of function
-				let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
+				// Don't include lifecycle functions in callable function list
+				match function_ident.to_string().as_ref() {
+					"update" => None,
+					"pause" => None,
+					"resume" => None,
+					_ => {
+						// Create a matchname string literal that matches name of function
+						let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
 
-				let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+						let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
 
-				if function.ret_types.is_empty() {
-					Some(quote! {
-						#match_name => {
-							inner.#function_ident(
-								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
-							);
-							Vec::new()
+						if function.ret_types.is_empty() {
+							Some(quote! {
+								#match_name => {
+									inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									Vec::new()
+								}
+							})
+						} else {
+							Some(quote! {
+								#match_name => {
+									let result = inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									let mut encoder = mazzaroth_wasm::Encoder::new();
+									encoder.push(result);
+									encoder.values()
+								}
+							})
 						}
-					})
-				} else {
-					Some(quote! {
-						#match_name => {
-							let result = inner.#function_ident(
-								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
-							);
-							let mut encoder = mazzaroth_wasm::Encoder::new();
-							encoder.push(result);
-							encoder.values()
-						}
-					})
+					},
 				}
 			},
 			_ => None,
@@ -126,31 +134,40 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			TraitItem::Readonly(ref function) => {
 				let function_ident = &function.name;
 
-				// Create a matchname string literal that matches name of function
-				let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
+				// Don't include lifecycle functions in callable function list
+				match function_ident.to_string().as_ref() {
+					"update" => None,
+					"pause" => None,
+					"resume" => None,
+					_ => {
 
-				let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+						// Create a matchname string literal that matches name of function
+						let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
 
-				if function.ret_types.is_empty() {
-					Some(quote! {
-						#match_name => {
-							inner.#function_ident(
-								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
-							);
-							Vec::new()
+						let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+
+						if function.ret_types.is_empty() {
+							Some(quote! {
+								#match_name => {
+									inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									Vec::new()
+								}
+							})
+						} else {
+							Some(quote! {
+								#match_name => {
+									let result = inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									let mut encoder = mazzaroth_wasm::Encoder::new();
+									encoder.push(result);
+									encoder.values()
+								}
+							})
 						}
-					})
-				} else {
-					Some(quote! {
-						#match_name => {
-							let result = inner.#function_ident(
-								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
-							);
-							let mut encoder = mazzaroth_wasm::Encoder::new();
-							encoder.push(result);
-							encoder.values()
-						}
-					})
+					},
 				}
 			},
 			_ => None,
@@ -215,6 +232,21 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 							#(#readonly_functions,)*
 							_ => panic!("Invalid readonly method name"),
 						}
+					},
+					"update" => {
+						// Update executes the reserved update function, with no expected return so return
+						inner.update();
+						Vec::new()
+					},
+					"pause" => {
+						// Update executes the reserved update function, with no expected return so return
+						inner.update();
+						Vec::new()
+					},
+					"resume" => {
+						// Update executes the reserved update function, with no expected return so return
+						inner.update();
+						Vec::new()
 					},
 					_ => panic!("Invalid lifecycle name"),
 				}

@@ -83,10 +83,40 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 
 	// Loop through the trait items of the contract and for Functions build a 
 	// quote map of function name to a function wrapper that gets arguments from encoded bytes
-	// and returns bytes
+	// and returns bytes. Also includes Readonly functions in contract.
 	let functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
 		match *item {
 			TraitItem::Function(ref function) => {
+				let function_ident = &function.name;
+
+				// Create a matchname string literal that matches name of function
+				let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
+
+				let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+
+				if function.ret_types.is_empty() {
+					Some(quote! {
+						#match_name => {
+							inner.#function_ident(
+								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+							);
+							Vec::new()
+						}
+					})
+				} else {
+					Some(quote! {
+						#match_name => {
+							let result = inner.#function_ident(
+								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+							);
+							let mut encoder = mazzaroth_wasm::Encoder::new();
+							encoder.push(result);
+							encoder.values()
+						}
+					})
+				}
+			},
+			TraitItem::Readonly(ref function) => {
 				let function_ident = &function.name;
 
 				// Create a matchname string literal that matches name of function

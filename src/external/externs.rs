@@ -52,6 +52,9 @@ extern "C" {
     /// Key should be the address of an account.
     pub(crate) fn _set_account_balance(key: *const u8, key_length: usize, new_balance: u64);
 
+    /// Check if a particular account is the owner of the contract.
+    pub(crate) fn _is_owner(key: *const u8, key_length: usize) -> bool;
+
     /// Host hashing function: sha256
     pub(crate) fn _sha256(data: *const u8, data_length: usize, hash: *mut u8);
 

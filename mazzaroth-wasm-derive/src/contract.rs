@@ -34,10 +34,11 @@ pub struct Function {
     pub codec: HashMap<String, String>,
 }
 
-/// Item within the trait, but only care about Functions
+/// Item within the trait, function or Readonly function
 /// Other can be const, type, macro, or verbatim
 pub enum TraitItem {
     Function(Function),
+    Readonly(Function),
     Other(syn::TraitItem),
 }
 
@@ -79,16 +80,34 @@ impl TraitItem {
                 // Look for codec attrs
                 let codec = parse_attribute_codec(&method_trait_item.attrs);
 				
-                // Returns the TraitItem as sa new Function
-                TraitItem::Function(new_function(
-                    method_trait_item.sig.ident.clone(),
-                    method_trait_item.sig,
-                    codec,
-                ))
+                // If the function has the readonly attribute return as a Readonly function, else it is a regular function
+                if has_attribute(&method_trait_item.attrs, "readonly") {
+					TraitItem::Readonly(new_function(
+                        method_trait_item.sig.ident.clone(),
+                        method_trait_item.sig,
+                        codec,
+                    ))
+				}else{
+                    // Returns the TraitItem as a new Function
+                    TraitItem::Function(new_function(
+                        method_trait_item.sig.ident.clone(),
+                        method_trait_item.sig,
+                        codec,
+                    ))
+                }
 			},
 			trait_item => TraitItem::Other(trait_item)
 		}
 	}
+}
+
+fn has_attribute(attrs: &[syn::Attribute], name: &str) -> bool {
+	attrs.iter().any(|attr| {
+		if let Some(first_seg) = attr.path.segments.first() {
+			return first_seg.value().ident == name
+		};
+		false
+	})
 }
 
 fn parse_attribute_codec(attrs: &[syn::Attribute]) -> HashMap<String, String> {
@@ -216,6 +235,16 @@ impl quote::ToTokens for Contract {
 impl quote::ToTokens for TraitItem {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match *self {
+            TraitItem::Readonly(ref function) => {
+				tokens.append_all(syn::TraitItem::Method(
+					syn::TraitItemMethod {
+						attrs: Vec::new(),
+						sig: function.method_sig.clone(),
+						default: None,
+						semi_token: None,
+					}
+				).into_token_stream());
+			},
            TraitItem::Function(ref function) => {
 				tokens.append_all(syn::TraitItem::Method(
 					syn::TraitItemMethod {

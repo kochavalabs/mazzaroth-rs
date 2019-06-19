@@ -44,14 +44,6 @@ extern "C" {
     /// Use the return to set the capacity and length of a vector to call _get_account_name.
     pub(crate) fn _get_account_name_length(key: *const u8, key_length: usize) -> u32;
 
-    /// Get the account balance from the persistent DB provided by the runtime.
-    /// Key should be the address of an account and a u64 value is returned.
-    pub(crate) fn _get_account_balance(key: *const u8, key_length: usize) -> u64;
-
-    /// Set the account balance in the persistent DB provided by the runtime.
-    /// Key should be the address of an account.
-    pub(crate) fn _set_account_balance(key: *const u8, key_length: usize, new_balance: u64);
-
     /// Check if a particular account is the owner of the contract.
     pub(crate) fn _is_owner(key: *const u8, key_length: usize) -> bool;
 

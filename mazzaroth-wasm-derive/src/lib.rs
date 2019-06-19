@@ -72,6 +72,7 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 		#contract
 		mod #mod_name_ident {
 			extern crate mazzaroth_wasm;
+			extern crate mazzaroth_xdr;
 			use super::*; // Provide access to the user contract
 			#contract_toks
 		}
@@ -217,36 +218,36 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			fn execute(&mut self, payload: &[u8]) -> Vec<u8> {
 				let inner = &mut self.inner;
 
-				// first decode stream from payload to use
-				let mut decoder = mazzaroth_wasm::Decoder::new(payload);
- 
-				// TODO: Define an XDR type to hold these fields (lifecycle, method_id, etc.) instead of individual encoding
+				// first decode the input from stream
+				let mut payload_decoder = mazzaroth_wasm::Decoder::new(payload);
+				let mut input = payload_decoder.pop::<mazzaroth_xdr::Input>().expect("argument decoding failed");
 
-				// First param should be the lifecycle
-				let lifecycle = decoder.pop::<String>().expect("argument decoding failed");
-				match lifecycle.as_str() {
-					"call" => {
+				// Then create a decoder for params
+				let mut decoder = mazzaroth_wasm::InputDecoder::new(&input.parameters);
+
+				match input.inputType {
+					mazzaroth_xdr::InputType::WRITE => {
 						// Call executes a normal contract function (excludes readonly functions)
-						let method_id = decoder.pop::<String>().expect("argument decoding failed");
-						match method_id.as_str() {
+						match input.function.as_str() {
 							#(#functions,)*
 							_ => panic!("Invalid non-readonly method name"),
 						}
 					},
-					"readonly" => {
+					mazzaroth_xdr::InputType::READONLY => {
 						// Readonly executes a function tagged with readonly
 						// First param should be the string function name to call
-						let method_id = decoder.pop::<String>().expect("argument decoding failed");
-						match method_id.as_str() {
+						match input.function.as_str() {
 							#(#readonly_functions,)*
 							_ => panic!("Invalid readonly method name"),
 						}
 					},
+					/*
 					"constructor" => {
 						// Call the constructor with dynamic params
 						#constructor
 						Vec::new()
 					},
+					*/
 					_ => panic!("Invalid lifecycle name"),
 				}
 			}

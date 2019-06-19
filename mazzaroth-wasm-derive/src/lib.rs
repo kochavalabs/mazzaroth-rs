@@ -226,7 +226,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 				let mut decoder = mazzaroth_wasm::InputDecoder::new(&input.parameters);
 
 				match input.inputType {
-					mazzaroth_xdr::InputType::WRITE => {
+					mazzaroth_xdr::InputType::EXECUTE => {
 						// Call executes a normal contract function (excludes readonly functions)
 						match input.function.as_str() {
 							#(#functions,)*
@@ -241,14 +241,12 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 							_ => panic!("Invalid readonly method name"),
 						}
 					},
-					/*
-					"constructor" => {
+					mazzaroth_xdr::InputType::CONSTRUCTOR => {
 						// Call the constructor with dynamic params
 						#constructor
 						Vec::new()
 					},
-					*/
-					_ => panic!("Invalid lifecycle name"),
+					_ => panic!("Invalid input type"),
 				}
 			}
 		}

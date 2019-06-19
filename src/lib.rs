@@ -13,7 +13,7 @@ pub mod crypto;
 // Encoder and Decoder used for passing data between runtime
 // Can be used to create a custom AbiType.
 pub use abi::decoder::Decoder;
-pub use abi::input_decoder::InputDecoder;
+pub use abi::decoder::InputDecoder;
 pub use abi::encoder::Encoder;
 
 

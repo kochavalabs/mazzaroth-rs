@@ -180,6 +180,36 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 					},
 				}
 			},
+			TraitItem::Readonly(ref function) => {
+				let function_ident = &function.name;
+
+				// Create a matchname string literal that matches name of function
+				let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
+
+				let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+
+				if function.ret_types.is_empty() {
+					Some(quote! {
+						#match_name => {
+							inner.#function_ident(
+								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+							);
+							Vec::new()
+						}
+					})
+				} else {
+					Some(quote! {
+						#match_name => {
+							let result = inner.#function_ident(
+								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+							);
+							let mut encoder = mazzaroth_wasm::Encoder::new();
+							encoder.push(result);
+							encoder.values()
+						}
+					})
+				}
+			},
 			_ => None,
 		}
 	}).collect();

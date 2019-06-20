@@ -138,6 +138,15 @@ fn has_attribute(attrs: &[syn::Attribute], name: &str) -> bool {
 	})
 }
 
+fn has_attribute(attrs: &[syn::Attribute], name: &str) -> bool {
+	attrs.iter().any(|attr| {
+		if let Some(first_seg) = attr.path.segments.first() {
+			return first_seg.value().ident == name
+		};
+		false
+	})
+}
+
 fn parse_attribute_codec(attrs: &[syn::Attribute]) -> HashMap<String, String> {
     let mut codec = HashMap::new();
     for meta_items in attrs.iter().filter_map(get_mazzaroth_meta_items) {

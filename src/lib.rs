@@ -1,14 +1,11 @@
 #![feature(test)]
 
-// Define the custom AbiType implementations
+/// Defines the Encoder and Decoder used to transmit XDR objects to and from the host VM.
 pub mod abi;
 
 // Contract trait definition
 mod contract;
 pub use contract::ContractInterface;
-
-// Crypto for Sha3 256 hashing
-pub mod crypto;
 
 // Encoder and Decoder used for passing data between runtime
 // Can be used to create a custom AbiType.

@@ -1,4 +1,4 @@
-#![recursion_limit="128"]
+#![recursion_limit="256"]
 
 extern crate proc_macro;
 extern crate proc_macro2;
@@ -72,6 +72,7 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 		#contract
 		mod #mod_name_ident {
 			extern crate mazzaroth_wasm;
+			extern crate mazzaroth_xdr;
 			use super::*; // Provide access to the user contract
 			#contract_toks
 		}
@@ -79,7 +80,20 @@ fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc
 	})
 }
 
+// Tokenize contract to an implementation with a callable execute function
+// TODO: Insert owenrship check for constructor?
 fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStream {
+
+	let constructor = contract.constructor().map(
+		|signature| {
+			let arg_types = signature.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+			quote! {
+				self.inner.constructor(
+					#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+				);
+			}
+		}
+	);
 
 	// Loop through the trait items of the contract and for Functions build a 
 	// quote map of function name to a function wrapper that gets arguments from encoded bytes
@@ -89,31 +103,81 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			TraitItem::Function(ref function) => {
 				let function_ident = &function.name;
 
-				// Create a matchname string literal that matches name of function
-				let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
+				// Don't include constructor in callable function list
+				match function_ident.to_string().as_ref() {
+					"constructor" => None,
+					_ => {
+						// Create a matchname string literal that matches name of function
+						let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
 
-				let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+						let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
 
-				if function.ret_types.is_empty() {
-					Some(quote! {
-						#match_name => {
-							inner.#function_ident(
-								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
-							);
-							Vec::new()
+						if function.ret_types.is_empty() {
+							Some(quote! {
+								#match_name => {
+									inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									Vec::new()
+								}
+							})
+						} else {
+							Some(quote! {
+								#match_name => {
+									let result = inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									let mut encoder = mazzaroth_wasm::Encoder::new();
+									encoder.push(result);
+									encoder.values()
+								}
+							})
 						}
-					})
-				} else {
-					Some(quote! {
-						#match_name => {
-							let result = inner.#function_ident(
-								#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
-							);
-							let mut encoder = mazzaroth_wasm::Encoder::new();
-							encoder.push(result);
-							encoder.values()
+					},
+				}
+			},
+			_ => None,
+		}
+	}).collect();
+
+	// Same as above but only for Readonly functions
+	let readonly_functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
+		match *item {
+			TraitItem::Readonly(ref function) => {
+				let function_ident = &function.name;
+
+				// Don't include constructor in callable function list
+				match function_ident.to_string().as_ref() {
+					"constructor" => None,
+					_ => {
+
+						// Create a matchname string literal that matches name of function
+						let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
+
+						let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+
+						if function.ret_types.is_empty() {
+							Some(quote! {
+								#match_name => {
+									inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									Vec::new()
+								}
+							})
+						} else {
+							Some(quote! {
+								#match_name => {
+									let result = inner.#function_ident(
+										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+									);
+									let mut encoder = mazzaroth_wasm::Encoder::new();
+									encoder.push(result);
+									encoder.values()
+								}
+							})
 						}
-					})
+					},
 				}
 			},
 			TraitItem::Readonly(ref function) => {
@@ -184,15 +248,35 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 			fn execute(&mut self, payload: &[u8]) -> Vec<u8> {
 				let inner = &mut self.inner;
 
-				// first decode stream from payload to use
-				// First param should be the string function name to call
-				let mut decoder = mazzaroth_wasm::Decoder::new(payload);
+				// first decode the input from stream
+				let mut payload_decoder = mazzaroth_wasm::Decoder::new(payload);
+				let mut input = payload_decoder.pop::<mazzaroth_xdr::Input>().expect("argument decoding failed");
 
-				let method_id = decoder.pop::<String>().expect("argument decoding failed");
-				
-				match method_id.as_ref() {
-					#(#functions,)*
-					_ => panic!("Invalid method name"),
+				// Then create a decoder for params
+				let mut decoder = mazzaroth_wasm::InputDecoder::new(&input.parameters);
+
+				match input.inputType {
+					mazzaroth_xdr::InputType::EXECUTE => {
+						// Call executes a normal contract function (excludes readonly functions)
+						match input.function.as_str() {
+							#(#functions,)*
+							_ => panic!("Invalid non-readonly method name"),
+						}
+					},
+					mazzaroth_xdr::InputType::READONLY => {
+						// Readonly executes a function tagged with readonly
+						// First param should be the string function name to call
+						match input.function.as_str() {
+							#(#readonly_functions,)*
+							_ => panic!("Invalid readonly method name"),
+						}
+					},
+					mazzaroth_xdr::InputType::CONSTRUCTOR => {
+						// Call the constructor with dynamic params
+						#constructor
+						Vec::new()
+					},
+					_ => panic!("Invalid input type"),
 				}
 			}
 		}

@@ -23,3 +23,8 @@ cfg_if! {
 pub fn hook(info: &panic::PanicInfo) {
     hook_impl(info);
 }
+
+#[derive(Debug)]
+pub enum ExternalError {
+    MissingKeyError,
+}

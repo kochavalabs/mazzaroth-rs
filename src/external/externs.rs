@@ -33,7 +33,7 @@ extern "C" {
     pub(crate) fn _get_length(key: *const u8, key_length: usize) -> u32;
 
     /// Returns if the key exists in the persistent DB.
-    pub(crate) fn _get_exists(key: *const u8, key_length: usize) -> bool;
+    pub(crate) fn _key_exists(key: *const u8, key_length: usize) -> bool;
 
     /// Get an account name from the persistent DB provided by the runtime.
     /// Parameter value should be the mut pointer to a vector with length and capacity allocated.

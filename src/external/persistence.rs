@@ -1,4 +1,4 @@
-use super::externs::{_get, _get_length, _get_exists, _store};
+use super::externs::{_get, _get_exists, _get_length, _store};
 use super::ExternalError;
 
 /// Get the value associated with a string key from the persistent storage for this runtime.
@@ -10,7 +10,7 @@ pub fn get(key: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
         unsafe { val.set_len(len as usize) };
         unsafe { _get(key.as_ptr(), key.len(), val.as_mut_ptr()) };
         Ok(val)
-    }else{
+    } else {
         Err(ExternalError::MissingKeyError)
     }
 }

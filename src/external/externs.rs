@@ -41,7 +41,12 @@ extern "C" {
     pub(crate) fn _get_account_name(key: *const u8, key_length: usize, value: *mut u8);
 
     /// Set an account name in the persistent DB provided by the runtime.
-    pub(crate) fn _set_account_name(key: *const u8, key_length: usize, value: *const u8, value_length: usize);
+    pub(crate) fn _set_account_name(
+        key: *const u8,
+        key_length: usize,
+        value: *const u8,
+        value_length: usize,
+    );
 
     /// Returns the length of the name associated with the account key from the persistent DB.
     /// Use the return to set the capacity and length of a vector to call _get_account_name.

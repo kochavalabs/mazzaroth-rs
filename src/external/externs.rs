@@ -1,7 +1,6 @@
 pub const PRIVATE_KEY_LENGTH: usize = 32;
 pub const PUBLIC_KEY_LENGTH: usize = 32;
 
-#[no_mangle]
 extern "C" {
     /// Fetches input from the Runtime.
     /// Parameter input should be the mut pointer to a vector with length and capacity allocated.
@@ -100,7 +99,8 @@ extern "C" {
     ) -> u32;
 
     /// Return error messages to the host runtime
-    pub(crate) fn _log_error(msg: String);
+    pub(crate) fn _log_error(msg: *const u8, msg_length: usize);
 
-    pub(crate) fn _log(msg: String);
+    /// Log message to host runtime
+    pub(crate) fn _log(msg: *const u8, msg_length: usize);
 }

@@ -8,7 +8,8 @@ use std::panic;
 cfg_if! {
     if #[cfg(target_arch = "wasm32")] {
         fn hook_impl(info: &panic::PanicInfo) {
-            unsafe { _log_error(info.to_string()) };
+            let val = info.to_string().into_bytes();
+            unsafe { _log_error(val.as_ptr(), val.len()) };
         }
     } else {
         use std::io::{self, Write};

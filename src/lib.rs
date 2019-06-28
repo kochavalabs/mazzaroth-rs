@@ -49,7 +49,7 @@
 //!     transaction::ret(response);
 //! }
 //! 
-//! 
+//! // mazzaroth_abi used to generate the contract from the trait during compilation
 //! #[mazzaroth_abi(HelloWorld)]
 //! pub trait HelloWorldContract {
 //!     // hello() defined as a readonly function
@@ -80,7 +80,6 @@ pub use abi::encoder::Encoder;
 mod contract;
 pub use contract::ContractInterface;
 
-/// Defines the external modules used to interact with host runtime.
 pub mod external;
 
 #[macro_use]

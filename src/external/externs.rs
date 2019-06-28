@@ -1,5 +1,5 @@
-pub const PRIVATE_KEY_LENGTH: usize = 32;
-pub const PUBLIC_KEY_LENGTH: usize = 32;
+pub(crate) const PRIVATE_KEY_LENGTH: usize = 32;
+pub(crate) const PUBLIC_KEY_LENGTH: usize = 32;
 
 extern "C" {
     /// Fetches input from the Runtime.

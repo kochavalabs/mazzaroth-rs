@@ -1,4 +1,10 @@
-pub mod externs;
+//! Defines the external modules used to interact with host runtime.
+//! 
+//! These modules and functions can be used to interact with the Mazzaroth VM.
+
+// Externs includes the direct calls to host runtime
+// Functions are wrapped by functions in other modules
+pub(crate) mod externs;
 
 pub mod account;
 

@@ -154,7 +154,7 @@ pub fn shake256(data: Vec<u8>) -> Vec<u8> {
 /// use mazzaroth_wasm::crypto;
 /// let (priv_key, pub_key) = crypto::generate_key_pair().unwrap();
 /// ```
-pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
+pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
     let mut priv_key = Vec::with_capacity(32 as usize);
     let mut pub_key = Vec::with_capacity(32 as usize);
     unsafe { priv_key.set_len(32 as usize) };
@@ -164,7 +164,7 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
 
     match priv_key.iter().any(|x| *x != 0x0u8) {
         true => Ok((priv_key, pub_key)),
-        false => Err("Problem generating key pair."),
+        false => Err(ExternalError::KeyPairGenerateError),
     }
 }
 
@@ -190,9 +190,9 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
 /// use mazzaroth_wasm::crypto;
 /// let signature =  crypto::sign_message(priv_bytes, message.as_bytes().to_vec()).unwrap();
 /// ```
-pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'static str> {
+pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
     if priv_key.len() != PRIVATE_KEY_LENGTH {
-        return Err("Incorrect private key length.");
+        return Err(ExternalError::KeyLengthError);
     }
     let mut signature = Vec::with_capacity(64 as usize);
     unsafe { signature.set_len(64 as usize) };
@@ -208,7 +208,7 @@ pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'st
 
     match signature.iter().any(|x| *x != 0x0u8) {
         true => Ok(signature),
-        false => Err("Problem signing message."),
+        false => Err(ExternalError::SignMessageError),
     }
 }
 

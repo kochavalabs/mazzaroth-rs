@@ -3,6 +3,7 @@
 #[cfg(target_arch = "wasm32")]
 use super::externs::_log_error;
 
+use std::fmt;
 use std::panic;
 
 cfg_if! {
@@ -28,4 +29,19 @@ pub fn hook(info: &panic::PanicInfo) {
 #[derive(Debug)]
 pub enum ExternalError {
     MissingKeyError,
+    KeyPairGenerateError,
+    KeyLengthError,
+    SignMessageError,
+}
+
+impl std::fmt::Display for ExternalError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let message = match *self {
+            ExternalError::MissingKeyError => "Could not find key in state.",
+            ExternalError::KeyPairGenerateError => "Problem generating key pair.",
+            ExternalError::KeyLengthError => "Incorrect key length.",
+            ExternalError::SignMessageError => "Problem signing message.",
+        };
+        write!(f, "{}", message)
+    }
 }

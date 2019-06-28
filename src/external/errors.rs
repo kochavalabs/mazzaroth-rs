@@ -1,3 +1,13 @@
+//! Provides the ExternalError definitions and a panic hook.
+//!
+//! # How to use panic hook
+//!
+//! Call the std::panic::set_hook function as the first line of main():
+//!
+//! ```
+//! std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
+//! ```
+
 /// Panic hook for host runtime that has a _log_error function defined.
 /// https://github.com/rustwasm/console_error_panic_hook
 #[cfg(target_arch = "wasm32")]
@@ -22,15 +32,28 @@ cfg_if! {
 }
 
 /// A panic hook that logs panics to extern _error when building with wasm32
+///
+/// # How to use
+///
+/// Call the std::panic::set_hook function as the first line of main():
+///
+/// ```
+/// std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
+/// ```
 pub fn hook(info: &panic::PanicInfo) {
     hook_impl(info);
 }
 
+/// Defines the various errors that can be returned when calling external functions
 #[derive(Debug)]
 pub enum ExternalError {
+    /// Occurs when calling `get` with a key that does not exist in state
     MissingKeyError,
+    /// Occurs when the crypto `generate_key_pair` function fails
     KeyPairGenerateError,
+    /// Occurs when calling the crypto `sign_message` function with a key of the wrong length
     KeyLengthError,
+    /// Occurs when the crypto `sign_message` function fails
     SignMessageError,
 }
 

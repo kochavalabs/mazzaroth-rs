@@ -1,7 +1,8 @@
 use super::externs::{
     _generate_key_pair, _keccak256, _sha256, _sha3_256, _sha3_512, _shake256, _sign_message,
-    _validate_signature, PRIVATE_KEY_LENGTH, PUBLIC_KEY_LENGTH
+    _validate_signature, PRIVATE_KEY_LENGTH, PUBLIC_KEY_LENGTH,
 };
+use super::ExternalError;
 
 /// Calls a host function to Sha256 data and return the hash
 pub fn sha256(data: Vec<u8>) -> Vec<u8> {
@@ -61,7 +62,7 @@ pub fn shake256(data: Vec<u8>) -> Vec<u8> {
 /// Host hashing function for generating a cryptographic key pair.
 /// Currently returns a X25519 elliptic curve key pair, 32 byte private key
 /// and 32 byte public key
-pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
+pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
     let mut priv_key = Vec::with_capacity(32 as usize);
     let mut pub_key = Vec::with_capacity(32 as usize);
     unsafe { priv_key.set_len(32 as usize) };
@@ -71,7 +72,7 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
 
     match priv_key.iter().any(|x| *x != 0x0u8) {
         true => Ok((priv_key, pub_key)),
-        false => Err("Problem generating key pair."),
+        false => Err(ExternalError::KeyPairGenerateError),
     }
 }
 
@@ -80,9 +81,9 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), &'static str> {
 /// mostly for demonstration purposes.
 /// It uses a 32 byte X25519 elliptic curve private key and returns a 64 byte
 /// signature.
-pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'static str> {
+pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
     if priv_key.len() != PRIVATE_KEY_LENGTH {
-        return Err("Incorrect private key length.");
+        return Err(ExternalError::KeyLengthError);
     }
     let mut signature = Vec::with_capacity(64 as usize);
     unsafe { signature.set_len(64 as usize) };
@@ -98,7 +99,7 @@ pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, &'st
 
     match signature.iter().any(|x| *x != 0x0u8) {
         true => Ok(signature),
-        false => Err("Problem signing message."),
+        false => Err(ExternalError::SignMessageError),
     }
 }
 

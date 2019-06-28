@@ -180,7 +180,7 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
 ///
 /// # Returns
 ///
-/// Result<(Vec<u8>, ExternalError)
+/// Result<(Vec<u8>, ExternalError)>
 /// * `Vec<u8>` - The 64 byte signature
 /// * `ExternalError` - Error if there is a problem signing message
 ///

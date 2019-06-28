@@ -1,5 +1,5 @@
 //! Defines the external modules used to interact with host runtime.
-//! 
+//!
 //! These modules and functions can be used to interact with the Mazzaroth VM.
 
 // Externs includes the direct calls to host runtime

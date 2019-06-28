@@ -11,9 +11,7 @@ pub struct Decoder<'a> {
 impl<'a> Decoder<'a> {
     /// New decoder for known payload
     pub fn new(raw: &'a [u8]) -> Self {
-        Decoder {
-            payload: raw,
-        }
+        Decoder { payload: raw }
     }
 
     /// Pop next argument of known type

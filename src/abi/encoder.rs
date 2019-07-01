@@ -1,3 +1,5 @@
+//! Encodes XDR objects into a byte slice.
+
 use ex_dee::ser::XDROut;
 
 /// Encoder for returning a number of arguments.

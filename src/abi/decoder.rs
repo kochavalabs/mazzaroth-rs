@@ -1,3 +1,5 @@
+//! Decodes encoded bytes into an XDR object.
+
 use ex_dee::de::XDRIn;
 use ex_dee::error::Error;
 use mazzaroth_xdr::Parameter;

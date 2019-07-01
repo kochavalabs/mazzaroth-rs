@@ -16,7 +16,7 @@
 //! mazzaroth-wasm-xdr
 //!
 //! Every contract will have a similar base layout for the main function and the contract trait definition.
-//! `main()` is used as the entrypoint and has several important features.  It will instantiate the contract,
+//! `main()` is used as the entry point and has several important features.  It will instantiate the contract,
 //! call a host function to retrieve function input, execute the function, and return a response.
 //!
 //! Here is a basic Hello World contract example:

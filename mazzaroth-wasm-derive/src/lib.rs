@@ -65,7 +65,7 @@
 //!     }
 //! }
 //! ```
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 
 extern crate proc_macro;
 extern crate proc_macro2;
@@ -81,17 +81,18 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 
 mod contract;
-use contract::{Contract,TraitItem};
+use contract::{Contract, TraitItem};
 
 mod error;
-use error::{Result,ProcError};
+use error::{ProcError, Result};
 
 mod json;
-use json::write_json_abi; 
+use json::write_json_abi;
 
 /// Macro used to mark the trait that defines the mazzaroth contract
-/// 
+///
 /// The argument becomes the module name used to construct the contract in main.
+///
 /// Example:
 /// ```
 /// #[mazzaroth_abi(HelloWorld)]
@@ -101,78 +102,81 @@ use json::write_json_abi;
 /// ```
 #[proc_macro_attribute]
 pub fn mazzaroth_abi(args: TokenStream, input: TokenStream) -> TokenStream {
-	let args_toks = parse_macro_input!(args as syn::AttributeArgs);
-	let input_toks = parse_macro_input!(input as syn::Item);
+    let args_toks = parse_macro_input!(args as syn::AttributeArgs);
+    let input_toks = parse_macro_input!(input as syn::Item);
 
-	let output = match impl_mazzaroth_abi(args_toks, input_toks) {
-		Ok(output) => output,
-		Err(err) => panic!("mazzaroth_abi encountered error: {}", err),
-	};
+    let output = match impl_mazzaroth_abi(args_toks, input_toks) {
+        Ok(output) => output,
+        Err(err) => panic!("mazzaroth_abi encountered error: {}", err),
+    };
 
-	output.into()
+    output.into()
 }
 
-fn impl_mazzaroth_abi(args: syn::AttributeArgs, input: syn::Item) -> Result<proc_macro2::TokenStream> {
-	// Get the name for the generated Contract from the Arg
-	if args.len() == 0 || args.len() > 1 {
-		return Err(ProcError::invalid_arguments(args.len()));
-	}
+fn impl_mazzaroth_abi(
+    args: syn::AttributeArgs,
+    input: syn::Item,
+) -> Result<proc_macro2::TokenStream> {
+    // Get the name for the generated Contract from the Arg
+    if args.len() == 0 || args.len() > 1 {
+        return Err(ProcError::invalid_arguments(args.len()));
+    }
 
-	// Get the contract name passed as an argument to the mazzaroth_abi macro
-	let argument_name = 
-		if let syn::NestedMeta::Meta(syn::Meta::Word(ident)) = args.get(0).unwrap() {
-			Ok(ident.to_string())
-		} else {
-			Err(ProcError::malformed_argument())
-		}?;
-	let argument_ident = syn::Ident::new(&argument_name, Span::call_site());
+    // Get the contract name passed as an argument to the mazzaroth_abi macro
+    let argument_name = if let syn::NestedMeta::Meta(syn::Meta::Word(ident)) = args.get(0).unwrap()
+    {
+        Ok(ident.to_string())
+    } else {
+        Err(ProcError::malformed_argument())
+    }?;
+    let argument_ident = syn::Ident::new(&argument_name, Span::call_site());
 
-	let contract = Contract::from_item(input);
+    let contract = Contract::from_item(input);
 
-	// Write out a json abi for the functions available
-	write_json_abi(&contract)?;
+    // Write out a json abi for the functions available
+    write_json_abi(&contract)?;
 
-	// Mod that is created around contract trait
-	let mod_name = format!("mazzaroth_abi_impl_{}", &contract.name().clone());
-	let mod_name_ident = syn::Ident::new(&mod_name, Span::call_site());
+    // Mod that is created around contract trait
+    let mod_name = format!("mazzaroth_abi_impl_{}", &contract.name().clone());
+    let mod_name_ident = syn::Ident::new(&mod_name, Span::call_site());
 
-	// Tokenize the contract which will have a single entry
-	// to call the contract functions
-	let contract_toks = tokenize_contract(&argument_name, &contract);
+    // Tokenize the contract which will have a single entry
+    // to call the contract functions
+    let contract_toks = tokenize_contract(&argument_name, &contract);
 
-	// Note: Imports are included in the generated module here
-	// So if types are added that can be used as function params or returns, they must be included.
-	Ok(quote! {
-		#contract
-		mod #mod_name_ident {
-			extern crate mazzaroth_wasm;
-			extern crate mazzaroth_xdr;
-			use super::*; // Provide access to the user contract
-			#contract_toks
-		}
-		pub use self::#mod_name_ident::#argument_ident;
-	})
+    // Note: Imports are included in the generated module here
+    // So if types are added that can be used as function params or returns, they must be included.
+    Ok(quote! {
+        #contract
+        mod #mod_name_ident {
+            extern crate mazzaroth_wasm;
+            extern crate mazzaroth_xdr;
+            use super::*; // Provide access to the user contract
+            #contract_toks
+        }
+        pub use self::#mod_name_ident::#argument_ident;
+    })
 }
 
 // Tokenize contract to an implementation with a callable execute function
 // TODO: Insert owenrship check for constructor?
 fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStream {
+    let constructor = contract.constructor().map(|signature| {
+        let arg_types = signature
+            .arguments
+            .iter()
+            .map(|&(_, ref ty)| quote! { #ty });
+        quote! {
+            self.inner.constructor(
+                #(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+            );
+        }
+    });
 
-	let constructor = contract.constructor().map(
-		|signature| {
-			let arg_types = signature.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
-			quote! {
-				self.inner.constructor(
-					#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
-				);
-			}
-		}
-	);
-
-	// Loop through the trait items of the contract and for Functions build a 
-	// quote map of function name to a function wrapper that gets arguments from encoded bytes
-	// and returns bytes. Also includes Readonly functions in contract.
-	let functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
+    // Loop through the trait items of the contract and for Functions build a
+    // quote map of function name to a function wrapper that gets arguments from encoded bytes
+    // and returns bytes. Also includes Readonly functions in contract.
+    let functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
 		match *item {
 			TraitItem::Function(ref function) => {
 				let function_ident = &function.name;
@@ -214,8 +218,8 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 		}
 	}).collect();
 
-	// Same as above but only for Readonly functions
-	let readonly_functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
+    // Same as above but only for Readonly functions
+    let readonly_functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
 		match *item {
 			TraitItem::Readonly(ref function) => {
 				let function_ident = &function.name;
@@ -258,71 +262,71 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 		}
 	}).collect();
 
-	let endpoint_ident = syn::Ident::new(name, Span::call_site());
-	let name_ident = syn::Ident::new(&contract.name(), Span::call_site());
+    let endpoint_ident = syn::Ident::new(name, Span::call_site());
+    let name_ident = syn::Ident::new(&contract.name(), Span::call_site());
 
-	quote!{
-		pub struct #endpoint_ident<T: #name_ident> {
-			pub inner: T,
-		}
+    quote! {
+        pub struct #endpoint_ident<T: #name_ident> {
+            pub inner: T,
+        }
 
-		impl<T: #name_ident> From<T> for #endpoint_ident<T> {
-			fn from(inner: T) -> #endpoint_ident<T> {
-				#endpoint_ident {
-					inner: inner,
-				}
-			}
-		}
+        impl<T: #name_ident> From<T> for #endpoint_ident<T> {
+            fn from(inner: T) -> #endpoint_ident<T> {
+                #endpoint_ident {
+                    inner: inner,
+                }
+            }
+        }
 
-		impl<T: #name_ident> #endpoint_ident<T> {
-			pub fn new(inner: T) -> Self {
-				#endpoint_ident {
-					inner: inner,
-				}
-			}
+        impl<T: #name_ident> #endpoint_ident<T> {
+            pub fn new(inner: T) -> Self {
+                #endpoint_ident {
+                    inner: inner,
+                }
+            }
 
-			pub fn instance(&self) -> &T {
-				&self.inner
-			}
-		}
+            pub fn instance(&self) -> &T {
+                &self.inner
+            }
+        }
 
-		impl<T: #name_ident> mazzaroth_wasm::ContractInterface for #endpoint_ident<T> {
-			#[allow(unused_mut)]
-			#[allow(unused_variables)]
-			fn execute(&mut self, payload: &[u8]) -> Vec<u8> {
-				let inner = &mut self.inner;
+        impl<T: #name_ident> mazzaroth_wasm::ContractInterface for #endpoint_ident<T> {
+            #[allow(unused_mut)]
+            #[allow(unused_variables)]
+            fn execute(&mut self, payload: &[u8]) -> Vec<u8> {
+                let inner = &mut self.inner;
 
-				// first decode the input from stream
-				let mut payload_decoder = mazzaroth_wasm::Decoder::new(payload);
-				let mut input = payload_decoder.pop::<mazzaroth_xdr::Input>().expect("argument decoding failed");
+                // first decode the input from stream
+                let mut payload_decoder = mazzaroth_wasm::Decoder::new(payload);
+                let mut input = payload_decoder.pop::<mazzaroth_xdr::Input>().expect("argument decoding failed");
 
-				// Then create a decoder for params
-				let mut decoder = mazzaroth_wasm::InputDecoder::new(&input.parameters);
+                // Then create a decoder for params
+                let mut decoder = mazzaroth_wasm::InputDecoder::new(&input.parameters);
 
-				match input.inputType {
-					mazzaroth_xdr::InputType::EXECUTE => {
-						// Call executes a normal contract function (excludes readonly functions)
-						match input.function.as_str() {
-							#(#functions,)*
-							_ => panic!("Invalid non-readonly method name"),
-						}
-					},
-					mazzaroth_xdr::InputType::READONLY => {
-						// Readonly executes a function tagged with readonly
-						// First param should be the string function name to call
-						match input.function.as_str() {
-							#(#readonly_functions,)*
-							_ => panic!("Invalid readonly method name"),
-						}
-					},
-					mazzaroth_xdr::InputType::CONSTRUCTOR => {
-						// Call the constructor with dynamic params
-						#constructor
-						Vec::new()
-					},
-					_ => panic!("Invalid input type"),
-				}
-			}
-		}
-	}
+                match input.inputType {
+                    mazzaroth_xdr::InputType::EXECUTE => {
+                        // Call executes a normal contract function (excludes readonly functions)
+                        match input.function.as_str() {
+                            #(#functions,)*
+                            _ => panic!("Invalid non-readonly method name"),
+                        }
+                    },
+                    mazzaroth_xdr::InputType::READONLY => {
+                        // Readonly executes a function tagged with readonly
+                        // First param should be the string function name to call
+                        match input.function.as_str() {
+                            #(#readonly_functions,)*
+                            _ => panic!("Invalid readonly method name"),
+                        }
+                    },
+                    mazzaroth_xdr::InputType::CONSTRUCTOR => {
+                        // Call the constructor with dynamic params
+                        #constructor
+                        Vec::new()
+                    },
+                    _ => panic!("Invalid input type"),
+                }
+            }
+        }
+    }
 }

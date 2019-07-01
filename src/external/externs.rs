@@ -22,6 +22,9 @@ extern "C" {
     /// Store a key/value in the persistent DB provided by the runtime.
     pub(crate) fn _store(key: *const u8, key_length: usize, value: *const u8, value_length: usize);
 
+    /// Delete a key/value in the persistent DB provided by the runtime.
+    pub(crate) fn _delete(key: *const u8, key_length: usize);
+
     /// Get a Value for key from the persistent DB provided by the runtime.
     /// Parameter value should be the mut pointer to a vector with length and capacity allocated.
     /// Call _get_length first to get a length to allocate the value vector.

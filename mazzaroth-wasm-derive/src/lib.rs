@@ -1,3 +1,70 @@
+//! # Mazzaroth WASM Derive Library
+//!
+//! The Mazzaroth WASM Derive Library is a rust library that defines the macros
+//! used to compile Mazzaroth Smart Contracts and generate the JSON ABI.
+//!
+//! ## How to use
+//!
+//! The first step to using this library is to include the necessary dependencies.
+//! The following 3 dependencies should be included in your Cargo.toml:
+//!
+//! mazzaroth-wasm
+//! mazzaroth-wasm-derive
+//! mazzaroth-wasm-xdr
+//!
+//! Every contract will have a similar base layout for the main function and the contract trait definition.
+//! `main()` is used as the entrypoint and has several important features.  It will instantiate the contract,
+//! call a host function to retrieve function input, execute the function, and return a response.
+//!
+//! Here is a basic Hello World contract example:
+//! ```
+//! // must include the ContractInterface and mazzaroth_abi for compiling the macro
+//! extern crate mazzaroth_wasm;
+//! extern crate mazzaroth_wasm_derive;
+//! use mazzaroth_wasm::ContractInterface;
+//! use mazzaroth_wasm_derive::mazzaroth_abi;
+//!
+//! // using specific external host modules
+//! use mazzaroth_wasm::external::{transaction, log};
+//!
+//! #[no_mangle]
+//! pub fn main() {
+//!     // panic hook is set to call the host error log function when a panic occurs
+//!     std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
+//!
+//!     // Creates a new instance of the ABI generated around the Contract
+//!     let mut contract = HelloWorld::new(Hello {});
+//!
+//!     // Use a host function to get arguments
+//!     let args = transaction::arguments();
+//!
+//!     // Execute calls one of the functions defined in the contract
+//!     // Input for the function to call and it's params comes from the Runtime
+//!     let response = contract.execute(&args);
+//!
+//!     // Provide return value through host call
+//!     transaction::ret(response);
+//! }
+//!
+//! // mazzaroth_abi used to generate the contract from the trait during compilation
+//! #[mazzaroth_abi(HelloWorld)]
+//! pub trait HelloWorldContract {
+//!     // hello() defined as a readonly function
+//!     #[readonly]
+//!     fn hello(&mut self) -> u32;
+//! }
+//!
+//! // Struct used to implement the contract trait
+//! pub struct Hello {}
+//!
+//! // Actual contract implementation
+//! impl HelloWorldContract for Hello {
+//!     fn hello(&mut self) -> u32 {
+//!         log("Hello World!".to_string());
+//!         14
+//!     }
+//! }
+//! ```
 #![recursion_limit="256"]
 
 extern crate proc_macro;
@@ -22,9 +89,16 @@ use error::{Result,ProcError};
 mod json;
 use json::write_json_abi; 
 
-/// mazzaroth_abi
-/// args will contain the name of the contract provided
-/// input is the full trait code provided 
+/// Macro used to mark the trait that defines the mazzaroth contract
+/// 
+/// The argument becomes the module name used to construct the contract in main.
+/// Example:
+/// ```
+/// #[mazzaroth_abi(HelloWorld)]
+/// pub trait HelloWorldContract {
+///     
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn mazzaroth_abi(args: TokenStream, input: TokenStream) -> TokenStream {
 	let args_toks = parse_macro_input!(args as syn::AttributeArgs);

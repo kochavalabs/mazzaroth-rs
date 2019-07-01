@@ -1,9 +1,11 @@
+//! Decodes encoded bytes into an XDR object.
+
 use ex_dee::de::XDRIn;
 use ex_dee::error::Error;
 use mazzaroth_xdr::Parameter;
 
-/// Decode a single payload of bytes.
-/// Value is expected to implement XDRIn to be properly popped.
+/// Decode a single payload of bytes into an XDR object.
+/// Value must implement XDRIn.
 pub struct Decoder<'a> {
     payload: &'a [u8],
 }
@@ -11,9 +13,7 @@ pub struct Decoder<'a> {
 impl<'a> Decoder<'a> {
     /// New decoder for known payload
     pub fn new(raw: &'a [u8]) -> Self {
-        Decoder {
-            payload: raw,
-        }
+        Decoder { payload: raw }
     }
 
     /// Pop next argument of known type
@@ -24,8 +24,8 @@ impl<'a> Decoder<'a> {
     }
 }
 
-/// Decode a vector of Parameters.
-/// Values are expected to implement XDRIn to be properly popped.
+/// Decode a vector of Parameters into separate XDR object.
+/// Values must implement XDRIn.
 pub struct InputDecoder<'a> {
     payload: &'a Vec<Parameter>,
     position: usize,

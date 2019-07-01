@@ -59,16 +59,6 @@ impl std::fmt::Display for ProcError {
     }
 }
 
-impl std::error::Error for ProcError {
-    fn description(&self) -> &str {
-        match self.kind() {
-            ErrorKind::JsonError(err) => err.description(),
-            ErrorKind::InvalidArguments { .. } => "did not find exactly one argument to roth_abi",
-            ErrorKind::MalformedArgument { .. } => "malformed argument passed to roth_abi",
-        }
-    }
-}
-
 impl From<JsonError> for ProcError {
     fn from(json_err: JsonError) -> Self {
         ProcError::from_kind(ErrorKind::JsonError(json_err))

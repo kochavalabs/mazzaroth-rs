@@ -76,7 +76,6 @@ pub fn store(key: Vec<u8>, val: Vec<u8>) {
 pub fn delete(key: Vec<u8>) -> Result<(), ExternalError> {
     let exists = unsafe { _key_exists(key.as_ptr(), key.len()) };
     if exists {
-        let len = unsafe { _get_length(key.as_ptr(), key.len()) };
         unsafe { _delete(key.as_ptr(), key.len()) };
         Ok(())
     } else {

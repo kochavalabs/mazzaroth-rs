@@ -1,42 +1,81 @@
 # mazzaroth-wasm-rs
-mazzaroth rust library
 
-### How to use
+The Mazzaroth Rust Library is a rust library that includes host bindings
+and everything needed to compile rust contracts to Web Assembly, compatible
+with the Mazzaroth VM.  Here you will find the necessary abi encoders and
+decoders used to pass and return arguments to contract functions as well as
+the external host functions available to use.
 
-This library can be used by either cloning the repo and including the file path to its location in Cargo.toml dependencies or by using git dependencies:
+## How to use
+
+The first step to using this library is to include the necessary dependencies.  
+The following 3 dependencies should be included in your Cargo.toml:
+
+mazzaroth-wasm
+mazzaroth-wasm-derive
+mazzaroth-wasm-xdr
+
+Every contract will have a similar base layout for the main function and the contract trait definition.
+`main()` is used as the entry point and has several important features.  It will instantiate the contract,
+call a host function to retrieve function input, execute the function, and return a response.
+
+Here is a basic Hello World contract example:
 ```
-mazzaroth-wasm = { git = "ssh://git@github.com/kochavalabs/mazzaroth-wasm-rs.git", branch = "develop"}
-mazzaroth-wasm-derive = { git = "ssh://git@github.com/kochavalabs/mazzaroth-wasm-rs.git", branch = "develop"}
-```
+// must include the ContractInterface and mazzaroth_abi for compiling the macro
+extern crate mazzaroth_wasm;
+extern crate mazzaroth_wasm_derive;
+use mazzaroth_wasm::ContractInterface;
+use mazzaroth_wasm_derive::mazzaroth_abi;
 
-To use the derive proc macro to generate the mazzaroth abi include the use statement: `use mazzaroth_wasm_derive::mazzaroth_abi;` and put `#[mazzaroth_abi(<contract name>)]` above the contract trait.  For Example:
-```
-#[mazzaroth_abi(MRC20)]
-pub trait MRC20Contract {
-    // NOTE: We currently make no restriction on constructor call
-    fn constructor(&mut self, owner_address: Vec<u8>, preallocated: u32);
+// using specific external host modules
+use mazzaroth_wasm::external::{transaction, log};
 
-    // NOTE: We are not pulling sender address from transaction so it must be passed in to this function
-    // TODO: Boolean return ABIType
-    fn transfer(&mut self, from_address: Vec<u8>, to_address: Vec<u8>, value: u32);
+#[no_mangle]
+pub fn main() {
+    // panic hook is set to call the host error log function when a panic occurs
+    std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
 
-    fn balance_of(&mut self, address: Vec<u8>) -> u32;
+    // Creates a new instance of the ABI generated around the Contract
+    let mut contract = HelloWorld::new(Hello {});
 
-    fn total_supply(&mut self) -> u32;
+    // Use a host function to get arguments
+    let args = transaction::arguments();
+
+    // Execute calls one of the functions defined in the contract
+    // Input for the function to call and it's params comes from the Runtime
+    let response = contract.execute(&args);
+
+    // Provide return value through host call
+    transaction::ret(response);
+}
+
+// mazzaroth_abi used to generate the contract from the trait during compilation
+#[mazzaroth_abi(HelloWorld)]
+pub trait HelloWorldContract {
+    // hello() defined as a readonly function
+    #[readonly]
+    fn hello(&mut self) -> u32;
+}
+
+// Struct used to implement the contract trait
+pub struct Hello {}
+
+// Actual contract implementation
+impl HelloWorldContract for Hello {
+    fn hello(&mut self) -> u32 {
+        log("Hello World!".to_string());
+        14
+    }
 }
 ```
 
-This proc macro will parse the trait for functions and create a new struct with an execute function that takes a Vec<u8> of the encoded arguments.  
+## Generating Documentation
 
-For this example you could use the contract and pass encoded arguments with the following code:
+From the root directory run the command:
 ```
-    // Creates a new instance of the ABI generated around the Contract
-    let mut contract = MRC20::new(Token {});
-
-    // Get the arguments from the external host
-    let args = transaction::arguments();
-
-    // Execute calls one of the functions defined in our contract
-    // Input for the function to call and it's params comes from the Runtime
-    let response = contract.execute(&args);
+cargo doc
 ```
+
+Optionally provide the --open flag to open the docs in a browser after building them.
+
+This will put all generated docs in `/target/doc`

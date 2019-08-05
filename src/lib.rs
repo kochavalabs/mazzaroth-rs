@@ -69,8 +69,6 @@
 //! }
 //! ```
 
-#![feature(test)]
-
 /// Defines the Encoder and Decoder used to transmit XDR objects to and from the host VM.
 pub mod abi;
 pub use abi::decoder::{Decoder, InputDecoder};

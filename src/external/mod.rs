@@ -4,6 +4,7 @@
 
 // Externs includes the direct calls to host runtime
 // Functions are wrapped by functions in other modules
+#[cfg(not(test))]
 pub(crate) mod externs;
 
 pub mod account;

@@ -20,7 +20,7 @@
 //! call a host function to retrieve function input, execute the function, and return a response.
 //!
 //! Here is a basic Hello World contract example:
-//! ```
+//! ```ignore
 //! // must include the ContractInterface and mazzaroth_abi for compiling the macro
 //! extern crate mazzaroth_wasm;
 //! extern crate mazzaroth_wasm_derive;

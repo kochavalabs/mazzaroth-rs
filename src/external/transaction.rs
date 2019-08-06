@@ -4,10 +4,10 @@
 use super::externs::{_fetch_input, _fetch_sender, _input_length, _ret, PUBLIC_KEY_LENGTH};
 
 #[cfg(feature = "host-mock")]
-static mut ARGS: Option<Vec<u8>> = None;
+pub static mut ARGS: Option<Vec<u8>> = None;
 
 #[cfg(feature = "host-mock")]
-static mut SENDER: Option<Vec<u8>> = None;
+pub static mut SENDER: Option<Vec<u8>> = None;
 
 /// Get the arguments encoded from the runtime input to be supplied to contract execute
 ///

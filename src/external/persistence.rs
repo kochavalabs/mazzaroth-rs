@@ -4,7 +4,7 @@
 use super::externs::{_delete, _get, _get_length, _key_exists, _store};
 
 #[cfg(feature = "host-mock")]
-static mut STORE: Option<std::collections::HashMap<Vec<u8>, Vec<u8>>> = None;
+pub static mut STORE: Option<std::collections::HashMap<Vec<u8>, Vec<u8>>> = None;
 
 use super::ExternalError;
 

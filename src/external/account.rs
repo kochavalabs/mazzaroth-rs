@@ -7,10 +7,10 @@ use super::externs::{_get_account_name, _get_account_name_length, _is_owner, _se
 use std::str;
 
 #[cfg(feature = "host-mock")]
-static mut NAME: Option<String> = None;
+pub static mut NAME: Option<String> = None;
 
 #[cfg(feature = "host-mock")]
-static mut OWNER: bool = false;
+pub static mut OWNER: bool = false;
 
 /// Get the value associated with a string key from the persistent storage for this runtime.
 ///

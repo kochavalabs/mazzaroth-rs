@@ -1,15 +1,15 @@
 //! Provides access to contract account objects stored in state.
 
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 use super::externs::{_get_account_name, _get_account_name_length, _is_owner, _set_account_name};
 
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 use std::str;
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 static mut NAME: Option<String> = None;
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 static mut OWNER: bool = false;
 
 /// Get the value associated with a string key from the persistent storage for this runtime.
@@ -28,7 +28,7 @@ static mut OWNER: bool = false;
 /// use mazzaroth_wasm::account;
 /// let name = account::get_name(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn get_name(key: Vec<u8>) -> String {
     let len = unsafe { _get_account_name_length(key.as_ptr(), key.len()) };
     let mut val = Vec::with_capacity(len as usize);
@@ -39,7 +39,7 @@ pub fn get_name(key: Vec<u8>) -> String {
     result
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn get_name(_key: Vec<u8>) -> String {
     unsafe {
         match NAME.clone() {
@@ -66,13 +66,13 @@ pub fn get_name(_key: Vec<u8>) -> String {
 /// use mazzaroth_wasm::account;
 /// account::set_name(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "name");
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn set_name(key: Vec<u8>, name: String) {
     let val = name.into_bytes();
     unsafe { _set_account_name(key.as_ptr(), key.len(), val.as_ptr(), val.len()) };
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn set_name(_key: Vec<u8>, name: String) {
     unsafe {
         NAME = Some(name.clone());
@@ -95,18 +95,18 @@ pub fn set_name(_key: Vec<u8>, name: String) {
 /// use mazzaroth_wasm::account;
 /// let is_owner = account::is_owner(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn is_owner(key: Vec<u8>) -> bool {
     let ret = unsafe { _is_owner(key.as_ptr(), key.len()) };
     ret
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn is_owner(key: Vec<u8>) -> bool {
     unsafe { OWNER }
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 mod tests {
     use super::*;
 

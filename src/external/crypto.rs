@@ -1,5 +1,5 @@
 //! Provides a set of cryptographic functions for use in contracts.
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 use super::externs::{
     _generate_key_pair, _keccak256, _sha256, _sha3_256, _sha3_512, _shake256, _sign_message,
     _validate_signature, PRIVATE_KEY_LENGTH, PUBLIC_KEY_LENGTH,
@@ -23,7 +23,7 @@ use super::ExternalError;
 /// use mazzaroth_wasm::external::crypto;
 /// let hash = crypto::sha256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn sha256(data: Vec<u8>) -> Vec<u8> {
     // Create Vec to store hash
     let mut hash = Vec::with_capacity(32 as usize); // 32 byte (256) hash
@@ -34,7 +34,7 @@ pub fn sha256(data: Vec<u8>) -> Vec<u8> {
     hash
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn sha256(__data: Vec<u8>) -> Vec<u8> {
     vec![]
 }
@@ -55,7 +55,7 @@ pub fn sha256(__data: Vec<u8>) -> Vec<u8> {
 /// use mazzaroth_wasm::external::crypto;
 /// let hash = crypto::sha3_256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn sha3_256(data: Vec<u8>) -> Vec<u8> {
     // Create Vec to store hash
     let mut hash = Vec::with_capacity(32 as usize); // 32 byte (256) hash
@@ -66,7 +66,7 @@ pub fn sha3_256(data: Vec<u8>) -> Vec<u8> {
     hash
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn sha3_256(_data: Vec<u8>) -> Vec<u8> {
     vec![]
 }
@@ -87,7 +87,7 @@ pub fn sha3_256(_data: Vec<u8>) -> Vec<u8> {
 /// use mazzaroth_wasm::external::crypto;
 /// let hash = crypto::sha3_512(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn sha3_512(data: Vec<u8>) -> Vec<u8> {
     // Create Vec to store hash
     let mut hash = Vec::with_capacity(64 as usize); // 64 byte (512) hash
@@ -98,7 +98,7 @@ pub fn sha3_512(data: Vec<u8>) -> Vec<u8> {
     hash
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn sha3_512(_data: Vec<u8>) -> Vec<u8> {
     vec![]
 }
@@ -119,7 +119,7 @@ pub fn sha3_512(_data: Vec<u8>) -> Vec<u8> {
 /// use mazzaroth_wasm::external::crypto;
 /// let hash = crypto::keccak256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn keccak256(data: Vec<u8>) -> Vec<u8> {
     // Create Vec to store hash
     let mut hash = Vec::with_capacity(32 as usize); // 32 byte (256) hash
@@ -130,7 +130,7 @@ pub fn keccak256(data: Vec<u8>) -> Vec<u8> {
     hash
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn keccak256(_data: Vec<u8>) -> Vec<u8> {
     vec![]
 }
@@ -151,7 +151,7 @@ pub fn keccak256(_data: Vec<u8>) -> Vec<u8> {
 /// use mazzaroth_wasm::external::crypto;
 /// let hash = crypto::shake256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn shake256(data: Vec<u8>) -> Vec<u8> {
     // Create Vec to store hash
     let mut hash = Vec::with_capacity(32 as usize); // 32 byte (256) hash
@@ -162,7 +162,7 @@ pub fn shake256(data: Vec<u8>) -> Vec<u8> {
     hash
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn shake256(_data: Vec<u8>) -> Vec<u8> {
     vec![]
 }
@@ -186,7 +186,7 @@ pub fn shake256(_data: Vec<u8>) -> Vec<u8> {
 /// use mazzaroth_wasm::external::crypto;
 /// let (priv_key, pub_key) = crypto::generate_key_pair().unwrap();
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
     let mut priv_key = Vec::with_capacity(32 as usize);
     let mut pub_key = Vec::with_capacity(32 as usize);
@@ -201,7 +201,7 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
     Err(ExternalError::MissingKeyError)
 }
@@ -228,7 +228,7 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
 /// use mazzaroth_wasm::external::crypto;
 /// let signature =  crypto::sign_message(priv_bytes, message.as_bytes().to_vec()).unwrap();
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
     if priv_key.len() != PRIVATE_KEY_LENGTH {
         return Err(ExternalError::KeyLengthError);
@@ -251,7 +251,7 @@ pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, Exte
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn sign_message(_priv_key: Vec<u8>, _message: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
     Ok(vec![])
 }
@@ -280,7 +280,7 @@ pub fn sign_message(_priv_key: Vec<u8>, _message: Vec<u8>) -> Result<Vec<u8>, Ex
 ///    _ => "Invalid".to_string(),
 /// }
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn validate_signature(pub_key: Vec<u8>, message: Vec<u8>, signature: Vec<u8>) -> u32 {
     if pub_key.len() != PUBLIC_KEY_LENGTH {
         return 0;
@@ -296,12 +296,12 @@ pub fn validate_signature(pub_key: Vec<u8>, message: Vec<u8>, signature: Vec<u8>
     result
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn validate_signature(_pub_key: Vec<u8>, _message: Vec<u8>, _signature: Vec<u8>) -> u32 {
     0
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 mod tests {
     use super::*;
 

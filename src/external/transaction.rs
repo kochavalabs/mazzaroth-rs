@@ -1,12 +1,12 @@
 //! Provides access to transaction input and return values.
 
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 use super::externs::{_fetch_input, _fetch_sender, _input_length, _ret, PUBLIC_KEY_LENGTH};
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 static mut ARGS: Option<Vec<u8>> = None;
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 static mut SENDER: Option<Vec<u8>> = None;
 
 /// Get the arguments encoded from the runtime input to be supplied to contract execute
@@ -26,7 +26,7 @@ static mut SENDER: Option<Vec<u8>> = None;
 /// let args = transaction::arguments();
 /// let response = contract.execute(&args);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn arguments() -> Vec<u8> {
     let length = unsafe { _input_length() };
     let mut args: Vec<u8> = Vec::with_capacity(length as usize);
@@ -38,7 +38,7 @@ pub fn arguments() -> Vec<u8> {
     args
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn arguments() -> Vec<u8> {
     unsafe {
         match ARGS {
@@ -65,15 +65,15 @@ pub fn arguments() -> Vec<u8> {
 /// let response = contract.execute(&args);
 /// transaction::ret(response);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn ret(values: Vec<u8>) {
     unsafe { _ret(values.as_ptr(), values.len()) };
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn ret(_values: Vec<u8>) {}
 
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn sender() -> Vec<u8> {
     let mut args: Vec<u8> = Vec::with_capacity(PUBLIC_KEY_LENGTH);
     unsafe {
@@ -84,7 +84,7 @@ pub fn sender() -> Vec<u8> {
     args
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn sender() -> Vec<u8> {
     unsafe {
         match SENDER {
@@ -94,7 +94,7 @@ pub fn sender() -> Vec<u8> {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 mod tests {
     use super::*;
 

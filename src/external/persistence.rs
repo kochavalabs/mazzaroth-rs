@@ -1,9 +1,9 @@
 //! Provides access to the contract state to store and get key values
 
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 use super::externs::{_delete, _get, _get_length, _key_exists, _store};
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 static mut STORE: Option<std::collections::HashMap<Vec<u8>, Vec<u8>>> = None;
 
 use super::ExternalError;
@@ -26,7 +26,7 @@ use super::ExternalError;
 /// use mazzaroth_wasm::persistence;
 /// let value = persistence::get(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn get(key: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
     let exists = unsafe { _key_exists(key.as_ptr(), key.len()) };
     if exists {
@@ -40,7 +40,7 @@ pub fn get(key: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn get(key: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
     unsafe {
         match STORE {
@@ -70,12 +70,12 @@ pub fn get(key: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
 /// use mazzaroth_wasm::persistence;
 /// persistence::store(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn store(key: Vec<u8>, val: Vec<u8>) {
     unsafe { _store(key.as_ptr(), key.len(), val.as_ptr(), val.len()) };
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn store(key: Vec<u8>, val: Vec<u8>) {
     unsafe {
         match (STORE) {
@@ -108,7 +108,7 @@ pub fn store(key: Vec<u8>, val: Vec<u8>) {
 /// use mazzaroth_wasm::persistence;
 /// persistence::delete(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
-#[cfg(not(test))]
+#[cfg(not(feature = "host-mock"))]
 pub fn delete(key: Vec<u8>) -> Result<(), ExternalError> {
     let exists = unsafe { _key_exists(key.as_ptr(), key.len()) };
     if exists {
@@ -119,7 +119,7 @@ pub fn delete(key: Vec<u8>) -> Result<(), ExternalError> {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 pub fn delete(key: Vec<u8>) -> Result<(), ExternalError> {
     unsafe {
         match STORE {
@@ -132,7 +132,7 @@ pub fn delete(key: Vec<u8>) -> Result<(), ExternalError> {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "host-mock")]
 mod tests {
     use super::*;
 

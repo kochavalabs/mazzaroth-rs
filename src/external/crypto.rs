@@ -301,8 +301,10 @@ pub fn validate_signature(_pub_key: Vec<u8>, _message: Vec<u8>, _signature: Vec<
     0
 }
 
+#[cfg(test)]
 #[cfg(feature = "host-mock")]
 mod tests {
+
     use super::*;
 
     #[test]

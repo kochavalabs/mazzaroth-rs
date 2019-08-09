@@ -94,6 +94,7 @@ pub fn sender() -> Vec<u8> {
     }
 }
 
+#[cfg(test)]
 #[cfg(feature = "host-mock")]
 mod tests {
     use super::*;

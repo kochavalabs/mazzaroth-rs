@@ -78,7 +78,7 @@ pub fn store(key: Vec<u8>, val: Vec<u8>) {
 #[cfg(feature = "host-mock")]
 pub fn store(key: Vec<u8>, val: Vec<u8>) {
     unsafe {
-        match (STORE) {
+        match STORE {
             Some(ref mut store) => {
                 store.insert(key, val);
             }
@@ -132,6 +132,7 @@ pub fn delete(key: Vec<u8>) -> Result<(), ExternalError> {
     }
 }
 
+#[cfg(test)]
 #[cfg(feature = "host-mock")]
 mod tests {
     use super::*;

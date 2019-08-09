@@ -102,10 +102,11 @@ pub fn is_owner(key: Vec<u8>) -> bool {
 }
 
 #[cfg(feature = "host-mock")]
-pub fn is_owner(key: Vec<u8>) -> bool {
+pub fn is_owner(_key: Vec<u8>) -> bool {
     unsafe { OWNER }
 }
 
+#[cfg(test)]
 #[cfg(feature = "host-mock")]
 mod tests {
     use super::*;

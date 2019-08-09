@@ -13,6 +13,7 @@ pub fn log(msg: String) {
     println!("log {}", msg);
 }
 
+#[cfg(test)]
 #[cfg(feature = "host-mock")]
 mod tests {
     use super::*;

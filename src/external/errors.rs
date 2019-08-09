@@ -4,7 +4,7 @@
 //!
 //! Call the std::panic::set_hook function as the first line of main():
 //!
-//! ```
+//! ```ignore
 //! std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
 //! ```
 
@@ -37,7 +37,7 @@ cfg_if! {
 ///
 /// Call the std::panic::set_hook function as the first line of main():
 ///
-/// ```
+/// ```ignore
 /// std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
 /// ```
 pub fn hook(info: &panic::PanicInfo) {
@@ -45,7 +45,7 @@ pub fn hook(info: &panic::PanicInfo) {
 }
 
 /// Defines the various errors that can be returned when calling external functions
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ExternalError {
     /// Occurs when calling `get` with a key that does not exist in state
     MissingKeyError,

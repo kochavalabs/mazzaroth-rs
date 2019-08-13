@@ -83,7 +83,7 @@ pub fn write_json_abi(intf: &contract::Contract) -> JsonResult<()> {
         target.push("target");
         target.push("json");
         fs::create_dir_all(&target).map_err(|err| JsonError::failed_to_create_dir(err))?;
-        target.push(&format!("{}.json", env::var("CARGO_PKG_NAME").unwrap_or(intf.name().to_owned())));
+        target.push(&format!("{}.json", intf.name()));
         target
     };
 

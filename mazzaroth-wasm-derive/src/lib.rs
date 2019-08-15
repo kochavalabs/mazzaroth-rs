@@ -40,7 +40,7 @@
 //!
 //!     // Execute calls one of the functions defined in the contract
 //!     // Input for the function to call and it's params comes from the Runtime
-//!     let response = contract.execute(&args);
+//!     let response = contract.execute(&args).unwrap();
 //!
 //!     // Provide return value through host call
 //!     transaction::ret(response);
@@ -146,7 +146,7 @@ fn impl_mazzaroth_abi(
 
     // Note: Imports are included in the generated module here
     // So if types are added that can be used as function params or returns, they must be included.
-    Ok(quote! {
+    let result = quote! {
         #contract
         mod #mod_name_ident {
             extern crate mazzaroth_wasm;
@@ -155,7 +155,9 @@ fn impl_mazzaroth_abi(
             #contract_toks
         }
         pub use self::#mod_name_ident::#argument_ident;
-    })
+
+    };
+    Ok(result)
 }
 
 // Tokenize contract to an implementation with a callable execute function
@@ -196,7 +198,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 									inner.#function_ident(
 										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 									);
-									Vec::new()
+									Ok(Vec::new())
 								}
 							})
 						} else {
@@ -207,7 +209,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 									);
 									let mut encoder = mazzaroth_wasm::Encoder::new();
 									encoder.push(result);
-									encoder.values()
+									Ok(encoder.values())
 								}
 							})
 						}
@@ -240,7 +242,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 									inner.#function_ident(
 										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 									);
-									Vec::new()
+									Ok(Vec::new())
 								}
 							})
 						} else {
@@ -251,7 +253,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 									);
 									let mut encoder = mazzaroth_wasm::Encoder::new();
 									encoder.push(result);
-									encoder.values()
+									Ok(encoder.values())
 								}
 							})
 						}
@@ -293,7 +295,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
         impl<T: #name_ident> mazzaroth_wasm::ContractInterface for #endpoint_ident<T> {
             #[allow(unused_mut)]
             #[allow(unused_variables)]
-            fn execute(&mut self, payload: &[u8]) -> Vec<u8> {
+            fn execute(&mut self, payload: &[u8]) -> Result<Vec<u8>, mazzaroth_wasm::ContractErrors> {
                 let inner = &mut self.inner;
 
                 // first decode the input from stream
@@ -308,7 +310,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                         // Call executes a normal contract function (excludes readonly functions)
                         match input.function.as_str() {
                             #(#functions,)*
-                            _ => panic!("Invalid non-readonly method name"),
+                            _ => Err(mazzaroth_wasm::ContractErrors::InvalidWriteMethodName),
                         }
                     },
                     mazzaroth_xdr::InputType::READONLY => {
@@ -316,15 +318,15 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                         // First param should be the string function name to call
                         match input.function.as_str() {
                             #(#readonly_functions,)*
-                            _ => panic!("Invalid readonly method name"),
+                            _ => Err(mazzaroth_wasm::ContractErrors::InvalidReadMethodName),
                         }
                     },
                     mazzaroth_xdr::InputType::CONSTRUCTOR => {
                         // Call the constructor with dynamic params
                         #constructor
-                        Vec::new()
+                        Ok(Vec::new())
                     },
-                    _ => panic!("Invalid input type"),
+                    _ => Err(mazzaroth_wasm::ContractErrors::InvalidInputType),
                 }
             }
         }

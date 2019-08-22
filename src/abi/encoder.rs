@@ -16,7 +16,7 @@ impl Encoder {
     }
 
     /// Consume `val` to the Encoder
-    pub fn push<T: XDROut<Vec<u8>>>(&mut self, val: T) {
+    pub fn push<T: XDROut>(&mut self, val: T) {
         let mut val_bytes: Vec<u8> = Vec::new();
         val.write_xdr(&mut val_bytes).unwrap();
 

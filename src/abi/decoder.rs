@@ -17,10 +17,10 @@ impl<'a> Decoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: XDRIn<&'a [u8]>>(&mut self) -> Result<T, Error> {
-        let mut bytes = &self.payload[..];
+    pub fn pop<T: XDRIn>(&mut self) -> Result<T, Error> {
+        let bytes = &self.payload[..];
 
-        Ok(T::read_xdr(&mut bytes)?.0)
+        Ok(T::read_xdr(bytes)?.0)
     }
 }
 
@@ -41,12 +41,12 @@ impl<'a> InputDecoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: XDRIn<&'a [u8]>>(&mut self) -> Result<T, Error> {
+    pub fn pop<T: XDRIn>(&mut self) -> Result<T, Error> {
         // grab bytes from parameter and advance 1
-        let mut bytes = &self.payload[self.position].t[..];
+        let bytes = &self.payload[self.position].t[..];
         self.position += 1;
 
-        Ok(T::read_xdr(&mut bytes)?.0)
+        Ok(T::read_xdr(bytes)?.0)
     }
 
     /// Current position for the decoder

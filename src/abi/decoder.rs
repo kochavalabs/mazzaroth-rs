@@ -1,7 +1,7 @@
 //! Decodes encoded bytes into an XDR object.
 
-use ex_dee::de::XDRIn;
-use ex_dee::error::Error;
+use xdr_rs_serialize::de::XDRIn;
+use xdr_rs_serialize::error::Error;
 use mazzaroth_xdr::Parameter;
 
 /// Decode a single payload of bytes into an XDR object.

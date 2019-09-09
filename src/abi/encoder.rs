@@ -1,6 +1,6 @@
 //! Encodes XDR objects into a byte slice.
 
-use ex_dee::ser::XDROut;
+use xdr_rs_serialize::ser::XDROut;
 
 /// Encoder for returning a number of arguments.
 /// To push a value to the encoder it must implement the Serialize trait for

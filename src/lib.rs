@@ -84,6 +84,6 @@ pub mod external;
 #[macro_use]
 extern crate cfg_if;
 
-extern crate ex_dee;
+extern crate xdr_rs_serialize;
 
 extern crate mazzaroth_xdr;

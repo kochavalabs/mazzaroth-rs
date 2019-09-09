@@ -23,7 +23,7 @@ Here is a basic Hello World contract example:
 
 ```rust
 // must include the ContractInterface and mazzaroth_abi for compiling the macro
-extern crate mazzaroth;
+extern crate mazzaroth_rs;
 extern crate mazzaroth_derive;
 use mazzaroth_rs::ContractInterface;
 use mazzaroth_rs_derive::mazzaroth_abi;

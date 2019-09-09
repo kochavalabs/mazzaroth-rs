@@ -25,7 +25,7 @@ pub static mut OWNER: bool = false;
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::account;
+/// use mazzaroth_rs::account;
 /// let name = account::get_name(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -63,7 +63,7 @@ pub fn get_name(_key: Vec<u8>) -> String {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::account;
+/// use mazzaroth_rs::account;
 /// account::set_name(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "name");
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -92,7 +92,7 @@ pub fn set_name(_key: Vec<u8>, name: String) {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::account;
+/// use mazzaroth_rs::account;
 /// let is_owner = account::is_owner(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]

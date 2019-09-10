@@ -5,7 +5,7 @@
 //! Call the std::panic::set_hook function as the first line of main():
 //!
 //! ```ignore
-//! std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
+//! std::panic::set_hook(Box::new(mazzaroth_rs::external::errors::hook));
 //! ```
 
 /// Panic hook for host runtime that has a _log_error function defined.
@@ -38,7 +38,7 @@ cfg_if! {
 /// Call the std::panic::set_hook function as the first line of main():
 ///
 /// ```ignore
-/// std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
+/// std::panic::set_hook(Box::new(mazzaroth_rs::external::errors::hook));
 /// ```
 pub fn hook(info: &panic::PanicInfo) {
     hook_impl(info);

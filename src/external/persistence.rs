@@ -23,7 +23,7 @@ use super::ExternalError;
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::persistence;
+/// use mazzaroth_rs::persistence;
 /// let value = persistence::get(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -67,7 +67,7 @@ pub fn get(key: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::persistence;
+/// use mazzaroth_rs::persistence;
 /// persistence::store(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -105,7 +105,7 @@ pub fn store(key: Vec<u8>, val: Vec<u8>) {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::persistence;
+/// use mazzaroth_rs::persistence;
 /// persistence::delete(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]

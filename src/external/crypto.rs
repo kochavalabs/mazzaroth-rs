@@ -20,7 +20,7 @@ use super::ExternalError;
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// let hash = crypto::sha256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -52,7 +52,7 @@ pub fn sha256(__data: Vec<u8>) -> Vec<u8> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// let hash = crypto::sha3_256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -84,7 +84,7 @@ pub fn sha3_256(_data: Vec<u8>) -> Vec<u8> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// let hash = crypto::sha3_512(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -116,7 +116,7 @@ pub fn sha3_512(_data: Vec<u8>) -> Vec<u8> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// let hash = crypto::keccak256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -148,7 +148,7 @@ pub fn keccak256(_data: Vec<u8>) -> Vec<u8> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// let hash = crypto::shake256(vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -183,7 +183,7 @@ pub fn shake256(_data: Vec<u8>) -> Vec<u8> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// let (priv_key, pub_key) = crypto::generate_key_pair().unwrap();
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -225,7 +225,7 @@ pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// let signature =  crypto::sign_message(priv_bytes, message.as_bytes().to_vec()).unwrap();
 /// ```
 #[cfg(not(feature = "host-mock"))]
@@ -274,7 +274,7 @@ pub fn sign_message(_priv_key: Vec<u8>, _message: Vec<u8>) -> Result<Vec<u8>, Ex
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::external::crypto;
+/// use mazzaroth_rs::external::crypto;
 /// match crypto::validate_signature(pub_bytes, message.as_bytes().to_vec(), sig_bytes) {
 ///    1 => "Valid".to_string(),
 ///    _ => "Invalid".to_string(),

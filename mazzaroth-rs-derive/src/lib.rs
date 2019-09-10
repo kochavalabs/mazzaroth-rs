@@ -1,6 +1,6 @@
-//! # Mazzaroth WASM Derive Library
+//! # Mazzaroth Derive Library
 //!
-//! The Mazzaroth WASM Derive Library is a rust library that defines the macros
+//! The Mazzaroth Derive Library is a rust library that defines the macros
 //! used to compile Mazzaroth Smart Contracts and generate the JSON ABI.
 //!
 //! ## How to use
@@ -8,9 +8,9 @@
 //! The first step to using this library is to include the necessary dependencies.
 //! The following 3 dependencies should be included in your Cargo.toml:
 //!
-//! mazzaroth-wasm
-//! mazzaroth-wasm-derive
-//! mazzaroth-wasm-xdr
+//! mazzaroth-rs
+//! mazzaroth-rs-derive
+//! mazzaroth-xdr
 //!
 //! Every contract will have a similar base layout for the main function and the contract trait definition.
 //! `main()` is used as the entry point and has several important features.  It will instantiate the contract,
@@ -19,18 +19,18 @@
 //! Here is a basic Hello World contract example:
 //! ```
 //! // must include the ContractInterface and mazzaroth_abi for compiling the macro
-//! extern crate mazzaroth_wasm;
-//! extern crate mazzaroth_wasm_derive;
-//! use mazzaroth_wasm::ContractInterface;
-//! use mazzaroth_wasm_derive::mazzaroth_abi;
+//! extern crate mazzaroth_rs;
+//! extern crate mazzaroth_rs_derive;
+//! use mazzaroth_rs::ContractInterface;
+//! use mazzaroth_rs_derive::mazzaroth_abi;
 //!
 //! // using specific external host modules
-//! use mazzaroth_wasm::external::{transaction, log};
+//! use mazzaroth_rs::external::{transaction, log};
 //!
 //! #[no_mangle]
 //! pub fn main() {
 //!     // panic hook is set to call the host error log function when a panic occurs
-//!     std::panic::set_hook(Box::new(mazzaroth_wasm::external::errors::hook));
+//!     std::panic::set_hook(Box::new(mazzaroth_rs::external::errors::hook));
 //!
 //!     // Creates a new instance of the ABI generated around the Contract
 //!     let mut contract = HelloWorld::new(Hello {});
@@ -149,7 +149,7 @@ fn impl_mazzaroth_abi(
     let result = quote! {
         #contract
         mod #mod_name_ident {
-            extern crate mazzaroth_wasm;
+            extern crate mazzaroth_rs;
             extern crate mazzaroth_xdr;
             use super::*; // Provide access to the user contract
             #contract_toks
@@ -207,7 +207,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 									let result = inner.#function_ident(
 										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 									);
-									let mut encoder = mazzaroth_wasm::Encoder::new();
+									let mut encoder = mazzaroth_rs::Encoder::new();
 									encoder.push(result);
 									Ok(encoder.values())
 								}
@@ -251,7 +251,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 									let result = inner.#function_ident(
 										#(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
 									);
-									let mut encoder = mazzaroth_wasm::Encoder::new();
+									let mut encoder = mazzaroth_rs::Encoder::new();
 									encoder.push(result);
 									Ok(encoder.values())
 								}
@@ -292,25 +292,25 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
             }
         }
 
-        impl<T: #name_ident> mazzaroth_wasm::ContractInterface for #endpoint_ident<T> {
+        impl<T: #name_ident> mazzaroth_rs::ContractInterface for #endpoint_ident<T> {
             #[allow(unused_mut)]
             #[allow(unused_variables)]
-            fn execute(&mut self, payload: &[u8]) -> Result<Vec<u8>, mazzaroth_wasm::ContractErrors> {
+            fn execute(&mut self, payload: &[u8]) -> Result<Vec<u8>, mazzaroth_rs::ContractErrors> {
                 let inner = &mut self.inner;
 
                 // first decode the input from stream
-                let mut payload_decoder = mazzaroth_wasm::Decoder::new(payload);
+                let mut payload_decoder = mazzaroth_rs::Decoder::new(payload);
                 let mut input = payload_decoder.pop::<mazzaroth_xdr::Input>().expect("argument decoding failed");
 
                 // Then create a decoder for params
-                let mut decoder = mazzaroth_wasm::InputDecoder::new(&input.parameters);
+                let mut decoder = mazzaroth_rs::InputDecoder::new(&input.parameters);
 
                 match input.inputType {
                     mazzaroth_xdr::InputType::EXECUTE => {
                         // Call executes a normal contract function (excludes readonly functions)
                         match input.function.as_str() {
                             #(#functions,)*
-                            _ => Err(mazzaroth_wasm::ContractErrors::InvalidWriteMethodName),
+                            _ => Err(mazzaroth_rs::ContractErrors::InvalidWriteMethodName),
                         }
                     },
                     mazzaroth_xdr::InputType::READONLY => {
@@ -318,7 +318,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                         // First param should be the string function name to call
                         match input.function.as_str() {
                             #(#readonly_functions,)*
-                            _ => Err(mazzaroth_wasm::ContractErrors::InvalidReadMethodName),
+                            _ => Err(mazzaroth_rs::ContractErrors::InvalidReadMethodName),
                         }
                     },
                     mazzaroth_xdr::InputType::CONSTRUCTOR => {
@@ -326,7 +326,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                         #constructor
                         Ok(Vec::new())
                     },
-                    _ => Err(mazzaroth_wasm::ContractErrors::InvalidInputType),
+                    _ => Err(mazzaroth_rs::ContractErrors::InvalidInputType),
                 }
             }
         }

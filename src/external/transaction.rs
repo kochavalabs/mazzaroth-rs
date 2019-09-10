@@ -22,7 +22,7 @@ pub static mut SENDER: Option<Vec<u8>> = None;
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::transaction;
+/// use mazzaroth_rs::transaction;
 /// let args = transaction::arguments();
 /// let response = contract.execute(&args);
 /// ```
@@ -61,7 +61,7 @@ pub fn arguments() -> Vec<u8> {
 /// # Example
 ///
 /// ```ignore
-/// use mazzaroth_wasm::transaction;
+/// use mazzaroth_rs::transaction;
 /// let response = contract.execute(&args);
 /// transaction::ret(response);
 /// ```

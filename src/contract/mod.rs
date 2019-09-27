@@ -5,7 +5,6 @@ pub trait ContractInterface {
     fn execute(&mut self, payload: &[u8]) -> Result<Vec<u8>, ContractErrors>;
 }
 
-
 #[derive(Debug)]
 pub enum ContractErrors {
     InvalidInputType,

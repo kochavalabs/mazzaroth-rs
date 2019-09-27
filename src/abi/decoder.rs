@@ -1,8 +1,8 @@
 //! Decodes encoded bytes into an XDR object.
 
+use mazzaroth_xdr::Parameter;
 use xdr_rs_serialize::de::XDRIn;
 use xdr_rs_serialize::error::Error;
-use mazzaroth_xdr::Parameter;
 
 /// Decode a single payload of bytes into an XDR object.
 /// Value must implement XDRIn.

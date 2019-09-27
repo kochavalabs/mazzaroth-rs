@@ -1,7 +1,11 @@
 [package]
 name = "mazzaroth-rs-derive"
 version = "0.1.0-alpha"
-authors = ["jeffsimpson <jsimpson@kochava.com>"]
+authors = ["Kochavalabs <dev@mazzaroth.io>"]
+description = "Mazzaroth Rust library derivation macros"
+license = "MIT"
+homepage = "https://github.com/kochavalabs/mazzaroth-rs"
+repository = "https://github.com/kochavalabs/mazzaroth-rs"
 
 [dependencies]
 syn = { version = "0.15.12" , features = ["full", "extra-traits", "parsing"] }

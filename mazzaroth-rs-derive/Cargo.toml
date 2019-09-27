@@ -1,6 +1,6 @@
 [package]
 name = "mazzaroth-rs-derive"
-version = "0.1.0"
+version = "0.1.0-alpha"
 authors = ["jeffsimpson <jsimpson@kochava.com>"]
 
 [dependencies]

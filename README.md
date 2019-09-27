@@ -1,5 +1,7 @@
 # mazzaroth-rs
 
+[![CircleCI](https://circleci.com/gh/kochavalabs/mazzaroth-rs.svg?style=svg)](https://circleci.com/gh/kochavalabs/mazzaroth-rs)
+
 The Mazzaroth Rust Library is a rust library that includes host bindings
 and everything needed to compile rust contracts to Web Assembly, compatible
 with the Mazzaroth VM.  Here you will find the necessary abi encoders and

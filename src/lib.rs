@@ -74,10 +74,9 @@ pub mod abi;
 pub use abi::decoder::{Decoder, InputDecoder};
 pub use abi::encoder::Encoder;
 
-
 // Contract trait definition
 mod contract;
-pub use contract::{ContractInterface, ContractErrors};
+pub use contract::{ContractErrors, ContractInterface};
 
 pub mod external;
 

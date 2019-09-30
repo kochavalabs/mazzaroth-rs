@@ -83,3 +83,7 @@ cargo doc
 Optionally provide the --open flag to open the docs in a browser after building them.
 
 This will put all generated docs in `/target/doc`
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)

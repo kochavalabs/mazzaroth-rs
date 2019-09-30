@@ -6,6 +6,7 @@ description = "Mazzaroth Rust library derivation macros"
 license = "MIT"
 homepage = "https://github.com/kochavalabs/mazzaroth-rs"
 repository = "https://github.com/kochavalabs/mazzaroth-rs"
+readme = "README.md"
 
 [dependencies]
 syn = { version = "0.15.12" , features = ["full", "extra-traits", "parsing"] }

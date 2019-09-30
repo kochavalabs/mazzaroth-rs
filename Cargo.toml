@@ -6,6 +6,7 @@ description = "Mazzaroth Rust library"
 license = "MIT"
 homepage = "https://github.com/kochavalabs/mazzaroth-rs"
 repository = "https://github.com/kochavalabs/mazzaroth-rs"
+readme = "README.md"
 
 [dependencies]
 mazzaroth-xdr = { git = "ssh://git@github.com/kochavalabs/mazzaroth-xdr.git", branch = "develop" }

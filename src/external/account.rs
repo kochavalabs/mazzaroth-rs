@@ -124,5 +124,4 @@ mod tests {
         set_name(vec![], "asdf".to_string());
         assert_eq!(get_name(vec![]), "asdf".to_string());
     }
-
 }

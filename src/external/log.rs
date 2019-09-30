@@ -22,5 +22,4 @@ mod tests {
     fn test_log() {
         log("asdf".to_string());
     }
-
 }

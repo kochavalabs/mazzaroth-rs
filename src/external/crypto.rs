@@ -331,5 +331,4 @@ mod tests {
         assert_eq!(expected, keccak256(vec![]));
         assert_eq!(expected, shake256(vec![]));
     }
-
 }

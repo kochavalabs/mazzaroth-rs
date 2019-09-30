@@ -154,5 +154,4 @@ mod tests {
         delete(vec![3, 2]).unwrap();
         assert_eq!(Err(ExternalError::MissingKeyError), get(vec![3, 2]));
     }
-
 }

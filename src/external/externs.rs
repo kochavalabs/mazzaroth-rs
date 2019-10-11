@@ -1,4 +1,3 @@
-pub(crate) const PRIVATE_KEY_LENGTH: usize = 32;
 pub(crate) const PUBLIC_KEY_LENGTH: usize = 32;
 
 extern "C" {
@@ -106,4 +105,15 @@ extern "C" {
 
     /// Log message to host runtime
     pub(crate) fn _log(msg: *const u8, msg_length: usize);
+
+    /// Inserts a value into a keyquery managed database.
+    /// Should be a serialized keyquery.xdr.Insert
+    pub(crate) fn _kq_insert(insert: *const u8, insert_length: usize);
+
+    /// Queries and returns its length and a 16 byte hash to look fetch the
+    /// result with by running _kq_query_fetch
+    pub(crate) fn _kq_query_run(query: *const u8, query_length: usize, hash: *const u8) -> u32;
+
+    /// Fetches the results of a _kq_query_run execution 
+    pub(crate) fn _kq_query_fetch(result: *const u8, hash: *const u8);
 }

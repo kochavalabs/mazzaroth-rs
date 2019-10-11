@@ -78,11 +78,11 @@ pub use abi::encoder::Encoder;
 mod contract;
 pub use contract::{ContractErrors, ContractInterface};
 
-pub mod external;
-
 #[macro_use]
 extern crate cfg_if;
 
+extern crate keyquery;
+extern crate mazzaroth_xdr;
 extern crate xdr_rs_serialize;
 
-extern crate mazzaroth_xdr;
+pub mod external;

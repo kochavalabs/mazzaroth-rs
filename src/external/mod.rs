@@ -11,6 +11,8 @@ pub mod account;
 
 pub mod persistence;
 
+pub mod query;
+
 pub mod crypto;
 
 pub mod transaction;

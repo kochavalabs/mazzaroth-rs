@@ -10,6 +10,11 @@ use keyquery::xdr::{Insert, Query};
 #[cfg(feature = "host-mock")]
 pub static mut QUERY_RESULT: Option<Vec<u8>> = None;
 
+/// Insert an object into a table defined by a mazzaroth schema
+///
+/// # Arguments
+///
+/// * `insert` - keyquery.xdr.Insert to be inserted into the blockchain state
 #[cfg(not(feature = "host-mock"))]
 pub fn insert(insert: Insert) {
     let mut insert_bytes: Vec<u8> = Vec::new();
@@ -20,6 +25,17 @@ pub fn insert(insert: Insert) {
 #[cfg(feature = "host-mock")]
 pub fn insert(_insert: Insert) {}
 
+/// Execute a Query against an uploaded schema in Mazzaroth
+///
+/// # Arguments
+///
+/// * `query` - keyquery.xdr.Query to be executed against the blockchain state
+///
+/// # Returns
+///
+///  Option<Vec<u8>>
+///  * `Some(Vec<u8>)` - xdr encoded result of the query execution
+///  * None - the query resulted in no results
 #[cfg(not(feature = "host-mock"))]
 pub fn query(query: Query) -> Option<Vec<u8>> {
     let mut query_bytes: Vec<u8> = Vec::new();

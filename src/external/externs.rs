@@ -114,6 +114,6 @@ extern "C" {
     /// result with by running _kq_query_fetch
     pub(crate) fn _kq_query_run(query: *const u8, query_length: usize, hash: *const u8) -> u32;
 
-    /// Fetches the results of a _kq_query_run execution 
+    /// Fetches the results of a _kq_query_run execution
     pub(crate) fn _kq_query_fetch(result: *const u8, hash: *const u8);
 }

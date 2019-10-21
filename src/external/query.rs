@@ -5,7 +5,7 @@ use super::externs::{_kq_insert, _kq_query_fetch, _kq_query_run};
 #[cfg(not(feature = "host-mock"))]
 use xdr_rs_serialize::ser::XDROut;
 
-use keyquery::xdr::{Insert, Query};
+use keyquery_xdr::{Insert, Query};
 
 #[cfg(feature = "host-mock")]
 pub static mut QUERY_RESULT: Option<Vec<u8>> = None;

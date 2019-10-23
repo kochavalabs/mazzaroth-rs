@@ -1,11 +1,8 @@
 //! Provides a set of cryptographic functions for use in contracts.
 #[cfg(not(feature = "host-mock"))]
 use super::externs::{
-    _generate_key_pair, _keccak256, _sha256, _sha3_256, _sha3_512, _shake256, _sign_message,
-    _validate_signature, PRIVATE_KEY_LENGTH, PUBLIC_KEY_LENGTH,
+    _keccak256, _sha256, _sha3_256, _sha3_512, _shake256, _validate_signature, PUBLIC_KEY_LENGTH,
 };
-
-use super::ExternalError;
 
 /// Calls a host function to Sha256 data and return the hash
 ///
@@ -167,95 +164,6 @@ pub fn shake256(_data: Vec<u8>) -> Vec<u8> {
     vec![]
 }
 
-/// Host hashing function for generating a cryptographic key pair.
-///
-/// # Arguments
-///
-/// * `None`
-///
-/// # Returns
-///
-/// Result<(Vec<u8>, Vec<u8>), ExternalError)
-/// * `Vec<u8>` - The X25519 32 byte private key
-/// * `Vec<u8>` - The X25519 32 byte public key
-/// * `ExternalError` - Error if there is a problem generating key pair
-///
-/// # Example
-///
-/// ```ignore
-/// use mazzaroth_rs::external::crypto;
-/// let (priv_key, pub_key) = crypto::generate_key_pair().unwrap();
-/// ```
-#[cfg(not(feature = "host-mock"))]
-pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
-    let mut priv_key = Vec::with_capacity(32 as usize);
-    let mut pub_key = Vec::with_capacity(32 as usize);
-    unsafe { priv_key.set_len(32 as usize) };
-    unsafe { pub_key.set_len(32 as usize) };
-
-    unsafe { _generate_key_pair(priv_key.as_mut_ptr(), pub_key.as_mut_ptr()) };
-
-    match priv_key.iter().any(|x| *x != 0x0u8) {
-        true => Ok((priv_key, pub_key)),
-        false => Err(ExternalError::KeyPairGenerateError),
-    }
-}
-
-#[cfg(feature = "host-mock")]
-pub fn generate_key_pair() -> Result<(Vec<u8>, Vec<u8>), ExternalError> {
-    Err(ExternalError::MissingKeyError)
-}
-
-/// Signs a message using the provided private key.
-///
-/// You typically wouldn't be signing something by sending your private key
-/// to the network, so this is mostly for demonstration purposes.
-///
-/// # Arguments
-///
-/// * `priv_key` - The Vec<u8> 32 byte X25519 elliptic curve private key
-/// * `message` - The Vec<u8> message to sign
-///
-/// # Returns
-///
-/// Result<(Vec<u8>, ExternalError)>
-/// * `Vec<u8>` - The 64 byte signature
-/// * `ExternalError` - Error if there is a problem signing message
-///
-/// # Example
-///
-/// ```ignore
-/// use mazzaroth_rs::external::crypto;
-/// let signature =  crypto::sign_message(priv_bytes, message.as_bytes().to_vec()).unwrap();
-/// ```
-#[cfg(not(feature = "host-mock"))]
-pub fn sign_message(priv_key: Vec<u8>, message: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
-    if priv_key.len() != PRIVATE_KEY_LENGTH {
-        return Err(ExternalError::KeyLengthError);
-    }
-    let mut signature = Vec::with_capacity(64 as usize);
-    unsafe { signature.set_len(64 as usize) };
-
-    unsafe {
-        _sign_message(
-            priv_key.as_ptr(),
-            message.as_ptr(),
-            message.len(),
-            signature.as_mut_ptr(),
-        )
-    };
-
-    match signature.iter().any(|x| *x != 0x0u8) {
-        true => Ok(signature),
-        false => Err(ExternalError::SignMessageError),
-    }
-}
-
-#[cfg(feature = "host-mock")]
-pub fn sign_message(_priv_key: Vec<u8>, _message: Vec<u8>) -> Result<Vec<u8>, ExternalError> {
-    Ok(vec![])
-}
-
 /// Validates a signature using the provided public key.
 ///
 /// A Mazzaroth user's account address can be used as the public key
@@ -310,16 +218,6 @@ mod tests {
     #[test]
     fn test_validate() {
         assert_eq!(0, validate_signature(vec![], vec![], vec![]));
-    }
-
-    #[test]
-    fn test_sign() {
-        assert_eq!(Ok(vec![]), sign_message(vec![], vec![]));
-    }
-
-    #[test]
-    fn test_generate_key_pair() {
-        assert_eq!(Err(ExternalError::MissingKeyError), generate_key_pair());
     }
 
     #[test]

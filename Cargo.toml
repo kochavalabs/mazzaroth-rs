@@ -12,8 +12,6 @@ readme = "README.md"
 sha3 = "0.8.1"
 cfg-if = "0.1.3"
 wasm-bindgen = "0.2.20"
-keyquery-builder = { git = "ssh://git@github.com/kochavalabs/keyquery-builder.git", branch = "develop" }
-keyquery-xdr = { git = "ssh://git@github.com/kochavalabs/keyquery-xdr.git", branch = "develop" }
 mazzaroth-xdr = { git = "ssh://git@github.com/kochavalabs/mazzaroth-xdr.git", branch = "develop" }
 xdr-rs-serialize = { git = "ssh://git@github.com/kochavalabs/xdr-rs-serialize.git", branch = "develop" }
 

@@ -81,8 +81,6 @@ pub use contract::{ContractErrors, ContractInterface};
 #[macro_use]
 extern crate cfg_if;
 
-extern crate keyquery_builder;
-extern crate keyquery_xdr;
 extern crate mazzaroth_xdr;
 extern crate xdr_rs_serialize;
 

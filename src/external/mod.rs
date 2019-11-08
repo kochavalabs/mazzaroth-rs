@@ -11,7 +11,7 @@ pub mod account;
 
 pub mod persistence;
 
-pub mod query;
+pub mod sql;
 
 pub mod crypto;
 

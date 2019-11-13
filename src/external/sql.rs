@@ -18,7 +18,7 @@ pub static mut QUERY_RESULT: Option<Vec<u8>> = None;
 ///  * `Some(Vec<u8>)` - xdr encoded result of the query execution
 ///  * None - the query resulted in no results
 #[cfg(not(feature = "host-mock"))]
-pub fn query(query: String) -> Option<Vec<u8>> {
+pub fn exec(query: String) -> Option<Vec<u8>> {
     let query_bytes: Vec<u8> = query.as_bytes().to_vec();
     let mut hash = Vec::with_capacity(16 as usize); // 32 byte (256) hash
     unsafe { hash.set_len(16 as usize) };
@@ -35,6 +35,6 @@ pub fn query(query: String) -> Option<Vec<u8>> {
 }
 
 #[cfg(feature = "host-mock")]
-pub fn query(_query: Query) -> Option<Vec<u8>> {
+pub fn exec(_query: String) -> Option<Vec<u8>> {
     unsafe { QUERY_RESULT.clone() }
 }

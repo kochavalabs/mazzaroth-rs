@@ -42,12 +42,12 @@ pub fn exec(_query: String) -> Option<Vec<u8>> {
     unsafe { QUERY_RESULT.clone() }
 }
 
-/// Execute a Query against an uploaded schema in Mazzaroth
+/// Executes a query that will insert a JSON object into the specified table.
 ///
 /// # Arguments
 ///
 /// * `table_name` - String name of the table to insert into
-/// * `json` - String json string to insert into the table
+/// * `json` - String JSON string to insert into the table
 ///
 /// # Returns
 ///

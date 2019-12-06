@@ -1,16 +1,19 @@
 //! Access to the query host functions
 
 #[cfg(not(feature = "host-mock"))]
-use super::externs::{_kq_query_fetch, _kq_query_run};
+use super::externs::{_kq_json_insert, _kq_query_fetch, _kq_query_run};
 
 #[cfg(feature = "host-mock")]
 pub static mut QUERY_RESULT: Option<Vec<u8>> = None;
 
-/// Execute a Query against an uploaded schema in Mazzaroth
+#[cfg(feature = "host-mock")]
+pub static mut INSERT_RESULT: Result<u32, u32> = Ok(0);
+
+/// Execute a string query against the Mazzaroth leger.
 ///
 /// # Arguments
 ///
-/// * `query` - keyquery.xdr.Query to be executed against the blockchain state
+/// * `query` - String query to be executed against the kvquery prefix
 ///
 /// # Returns
 ///
@@ -37,4 +40,38 @@ pub fn exec(query: String) -> Option<Vec<u8>> {
 #[cfg(feature = "host-mock")]
 pub fn exec(_query: String) -> Option<Vec<u8>> {
     unsafe { QUERY_RESULT.clone() }
+}
+
+/// Executes a query that will insert a JSON object into the specified table.
+///
+/// # Arguments
+///
+/// * `table_name` - String name of the table to insert into
+/// * `json` - String JSON string to insert into the table
+///
+/// # Returns
+///
+///  Result<u32, u32>
+///  * Ok(x) - resulting return code upon success
+///  * Err(x) - resulting return code upon error
+#[cfg(not(feature = "host-mock"))]
+pub fn insert(table_name: String, json: String) -> Result<u32, u32> {
+    let json_bytes: Vec<u8> = json.as_bytes().to_vec();
+    let table_bytes: Vec<u8> = table_name.as_bytes().to_vec();
+    match unsafe {
+        _kq_json_insert(
+            table_bytes.as_ptr(),
+            table_bytes.len(),
+            json_bytes.as_ptr(),
+            json_bytes.len(),
+        )
+    } {
+        0 => Ok(0),
+        x => Err(x),
+    }
+}
+
+#[cfg(feature = "host-mock")]
+pub fn insert(_table_name: String, _json: String) -> Result<u32, u32> {
+    unsafe { INSERT_RESULT.clone() }
 }

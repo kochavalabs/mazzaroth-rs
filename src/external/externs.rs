@@ -106,9 +106,14 @@ extern "C" {
     /// Log message to host runtime
     pub(crate) fn _log(msg: *const u8, msg_length: usize);
 
-    /// Inserts a value into a keyquery managed database.
-    /// Should be a serialized keyquery.xdr.Insert
-    pub(crate) fn _kq_insert(insert: *const u8, insert_length: usize);
+    /// Inserts a value into the ledger using kvquery. Should be a json string
+    /// representing the object.
+    pub(crate) fn _kq_json_insert(
+        table_name_ptr: *const u8,
+        table_name_len: usize,
+        json_ptr: *const u8,
+        json_len: usize,
+    ) -> u32;
 
     /// Queries and returns its length and a 16 byte hash to look fetch the
     /// result with by running _kq_query_fetch

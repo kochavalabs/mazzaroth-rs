@@ -1,6 +1,6 @@
 [package]
 name = "mazzaroth-rs"
-version = "0.1.0-alpha"
+version = "0.2.0"
 authors = ["Kochavalabs <dev@mazzaroth.io>"]
 description = "Mazzaroth Rust library"
 license = "MIT"
@@ -12,8 +12,8 @@ readme = "README.md"
 sha3 = "0.8.1"
 cfg-if = "0.1.3"
 wasm-bindgen = "0.2.20"
-mazzaroth-xdr = { git = "ssh://git@github.com/kochavalabs/mazzaroth-xdr.git", branch = "develop" }
-xdr-rs-serialize = { git = "ssh://git@github.com/kochavalabs/xdr-rs-serialize.git", branch = "develop" }
+mazzaroth-xdr = { branch = "develop", version = "0.2.2" }
+xdr-rs-serialize = { branch = "develop", version = "0.2.0" }
 
 [features]
 host-mock = []

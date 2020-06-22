@@ -124,20 +124,12 @@ pub struct ReadonlyEntry {
 }
 
 #[derive(Serialize, Debug)]
-pub struct ConstructorEntry {
-    #[serde(rename = "inputs")]
-    pub arguments: Vec<Argument>,
-}
-
-#[derive(Serialize, Debug)]
 #[serde(tag = "type")]
 pub enum AbiEntry {
     #[serde(rename = "function")]
     Function(FunctionEntry),
     #[serde(rename = "readonly")]
     Readonly(ReadonlyEntry),
-    #[serde(rename = "constructor")]
-    Constructor(ConstructorEntry),
 }
 
 #[derive(Serialize, Debug)]
@@ -157,12 +149,6 @@ impl<'a> From<&'a contract::Contract> for Abi {
                 }
                 _ => {}
             }
-        }
-
-        if let Some(constructor) = intf.constructor() {
-            result.push(AbiEntry::Constructor(
-                FunctionEntry::from(constructor).into(),
-            ));
         }
 
         Abi(result)
@@ -219,14 +205,6 @@ impl<'a> From<&'a contract::Function> for ReadonlyEntry {
                     codec: check_codec(item, ty),
                 })
                 .collect(),
-        }
-    }
-}
-
-impl From<FunctionEntry> for ConstructorEntry {
-    fn from(func: FunctionEntry) -> Self {
-        ConstructorEntry {
-            arguments: func.arguments,
         }
     }
 }

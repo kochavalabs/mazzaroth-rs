@@ -13,8 +13,8 @@ the external host functions available to use.
 The first step to using this library is to include the necessary dependencies.  
 The following 3 dependencies should be included in your Cargo.toml:
 
-mazzaroth-rs
-mazzaroth-rs-derive
+mazzaroth-rs  
+mazzaroth-rs-derive  
 mazzaroth-xdr
 
 Every contract will have a similar base layout for the main function and the contract trait definition.

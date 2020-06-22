@@ -13,9 +13,6 @@ pub struct Contract {
     /// Name of the contract trait.
     name: String,
 
-    // The constructor function, only called during a deploy.
-    constructor: Option<Function>,
-
     /// Either a method defined in the trait
     /// or other TraitItem that is ignored
     trait_items: Vec<TraitItem>,
@@ -54,23 +51,10 @@ impl Contract {
         };
 
         // Parse the trait items
-        // let items = contract_trait.items.into_iter().map(TraitItem::from_contract_item).collect();
-
-        let (constructor, items) = contract_trait
-            .items
-            .into_iter()
-            .map(TraitItem::from_contract_item)
-            .partition::<Vec<TraitItem>, _>(|item| {
-                item.name()
-                    .map_or(false, |ident| ident.to_string() == "constructor")
-            });
+        let items = contract_trait.items.into_iter().map(TraitItem::from_contract_item).collect();
 
         Contract {
             name: contract_trait.ident.to_string(),
-            constructor: constructor.into_iter().next().map(|item| match item {
-                TraitItem::Function(sig) => sig,
-                _ => panic!("The constructor must be a function!"),
-            }),
             trait_items: items,
         }
     }
@@ -81,10 +65,6 @@ impl Contract {
 
     pub fn trait_items(&self) -> &[TraitItem] {
         &self.trait_items
-    }
-
-    pub fn constructor(&self) -> Option<&Function> {
-        self.constructor.as_ref()
     }
 }
 
@@ -118,18 +98,6 @@ impl TraitItem {
                 }
             }
             trait_item => TraitItem::Other(trait_item),
-        }
-    }
-
-    // Returns the function name of the item
-    // Used to check if name is constructor
-    // Ignore Readonly since constructor cannot be readonly
-    fn name(&self) -> Option<&syn::Ident> {
-        use TraitItem::*;
-        match *self {
-            Function(ref sig) => Some(&sig.name),
-            Readonly(_) => None,
-            Other(_) => None,
         }
     }
 }
@@ -258,11 +226,9 @@ impl quote::ToTokens for Contract {
         let trait_ident = syn::Ident::new(&self.name, Span::call_site());
         let items = &self.trait_items;
 
-        // Put constructor and all other items in contract
-        let constructor_item = self.constructor().map(|c| TraitItem::Function(c.clone()));
+        // Put items in contract
         tokens.append_all(quote! (
             pub trait #trait_ident {
-                #constructor_item
                 #(#items)*
             }
         ));

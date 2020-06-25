@@ -175,6 +175,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
 
                 let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
                 let arg_types2 = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+                let ret_type = function.ret_types.iter().map(|ref ty| quote! {#ty}).next();
 
                 if function.ret_types.is_empty() {
                     Some(quote! {
@@ -192,7 +193,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                                 #(decoder.pop::<#arg_types>(stringify!(#arg_types2)).expect("argument decoding failed")),*
                             );
                             let mut encoder = mazzaroth_rs::Encoder::default();
-                            encoder.push(result);
+                            encoder.push(result, stringify!(#ret_type));
                             Ok(encoder.values())
                         }
                     })
@@ -212,6 +213,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                 let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
 
                 let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+                let ret_type = function.ret_types.iter().map(|ref ty| quote! {#ty}).next();
 
                 if function.ret_types.is_empty() {
                     Some(quote! {
@@ -229,7 +231,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                                 #(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
                             );
                             let mut encoder = mazzaroth_rs::Encoder::default();
-                            encoder.push(result);
+                            encoder.push(result, stringify!(#ret_type));
                             Ok(encoder.values())
                         }
                     })

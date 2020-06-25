@@ -44,9 +44,7 @@ impl<'a> InputDecoder<'a> {
         let bytes = &self.payload[self.position].t[..];
         self.position += 1;
         match typ {
-            "String" => read_json_string(format!(r#""{}""#, bytes.to_string())),
-            "u64" => read_json_string(format!(r#""{}""#, bytes.to_string())),
-            "i64" => read_json_string(format!(r#""{}""#, bytes.to_string())),
+            "String" | "u64" | "i64" => read_json_string(format!(r#""{}""#, bytes.to_string())),
             _ => read_json_string(bytes.to_string()),
         }
     }

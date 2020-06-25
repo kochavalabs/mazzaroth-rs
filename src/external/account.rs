@@ -35,8 +35,7 @@ pub fn get_name(key: Vec<u8>) -> String {
     unsafe { val.set_len(len as usize) };
     unsafe { _get_account_name(key.as_ptr(), key.len(), val.as_mut_ptr()) };
     // Convert name to String
-    let result = str::from_utf8(&val).unwrap().to_owned();
-    result
+    str::from_utf8(&val).unwrap().to_owned()
 }
 
 #[cfg(feature = "host-mock")]
@@ -97,8 +96,7 @@ pub fn set_name(_key: Vec<u8>, name: String) {
 /// ```
 #[cfg(not(feature = "host-mock"))]
 pub fn is_owner(key: Vec<u8>) -> bool {
-    let ret = unsafe { _is_owner(key.as_ptr(), key.len()) };
-    ret
+    unsafe { _is_owner(key.as_ptr(), key.len()) }
 }
 
 #[cfg(feature = "host-mock")]

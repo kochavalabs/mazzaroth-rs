@@ -193,15 +193,14 @@ pub fn validate_signature(pub_key: Vec<u8>, message: Vec<u8>, signature: Vec<u8>
     if pub_key.len() != PUBLIC_KEY_LENGTH {
         return 0;
     }
-    let result = unsafe {
+    unsafe {
         _validate_signature(
             pub_key.as_ptr(),
             message.as_ptr(),
             message.len(),
             signature.as_ptr(),
         )
-    };
-    result
+    }
 }
 
 #[cfg(feature = "host-mock")]

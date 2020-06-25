@@ -26,13 +26,13 @@ impl<'a> Decoder<'a> {
 /// Decode a vector of Parameters into separate XDR object.
 /// Values must implement XDRIn.
 pub struct InputDecoder<'a> {
-    payload: &'a Vec<Parameter>,
+    payload: &'a [Parameter],
     position: usize,
 }
 
 impl<'a> InputDecoder<'a> {
     /// New decoder for known payload
-    pub fn new(raw: &'a Vec<Parameter>) -> Self {
+    pub fn new(raw: &'a [Parameter]) -> Self {
         InputDecoder {
             payload: raw,
             position: 0,
@@ -54,7 +54,7 @@ impl<'a> InputDecoder<'a> {
     }
 
     /// Decoder payload
-    pub fn payload(&self) -> &'a Vec<Parameter> {
+    pub fn payload(&self) -> &'a [Parameter] {
         self.payload
     }
 }

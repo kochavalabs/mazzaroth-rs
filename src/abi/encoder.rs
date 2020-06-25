@@ -9,12 +9,13 @@ pub struct Encoder {
     values: Vec<u8>,
 }
 
-impl Encoder {
-    /// New encoder that will grow as items are pushed
-    pub fn new() -> Self {
+impl Default for Encoder {
+    fn default() -> Self {
         Encoder { values: Vec::new() }
     }
+}
 
+impl Encoder {
     /// Consume `val` to the Encoder
     pub fn push<T: XDROut>(&mut self, val: T) {
         let mut val_bytes: Vec<u8> = Vec::new();
@@ -31,7 +32,6 @@ impl Encoder {
 
     /// return the vector of values
     pub fn values(self) -> Vec<u8> {
-        let result = self.values;
-        result
+        self.values
     }
 }

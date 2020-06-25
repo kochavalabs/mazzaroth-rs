@@ -174,12 +174,13 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                 let match_name = syn::Lit::Str(syn::LitStr::new(&function_ident.to_string(), Span::call_site()));
 
                 let arg_types = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
+                let arg_types2 = function.arguments.iter().map(|&(_, ref ty)| quote! { #ty });
 
                 if function.ret_types.is_empty() {
                     Some(quote! {
                         #match_name => {
                             inner.#function_ident(
-                                #(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2)).expect("argument decoding failed")),*
                             );
                             Ok(Vec::new())
                         }
@@ -188,7 +189,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                     Some(quote! {
                         #match_name => {
                             let result = inner.#function_ident(
-                                #(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
+                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2)).expect("argument decoding failed")),*
                             );
                             let mut encoder = mazzaroth_rs::Encoder::default();
                             encoder.push(result);

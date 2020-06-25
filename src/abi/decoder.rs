@@ -1,5 +1,4 @@
 //! Decodes encoded bytes into an XDR object.
-
 use mazzaroth_xdr::Parameter;
 use xdr_rs_serialize::de::{read_json_string, XDRIn};
 use xdr_rs_serialize::error::Error;
@@ -40,12 +39,16 @@ impl<'a> InputDecoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: XDRIn>(&mut self) -> Result<T, Error> {
+    pub fn pop<T: XDRIn>(&mut self, typ: &'static str) -> Result<T, Error> {
         // grab bytes from parameter and advance 1
         let bytes = &self.payload[self.position].t[..];
         self.position += 1;
-
-        read_json_string(bytes.to_string())
+        match typ {
+            "String" => read_json_string(format!(r#""{}""#, bytes.to_string())),
+            "u64" => read_json_string(format!(r#""{}""#, bytes.to_string())),
+            "i64" => read_json_string(format!(r#""{}""#, bytes.to_string())),
+            _ => read_json_string(bytes.to_string()),
+        }
     }
 
     /// Current position for the decoder

@@ -7,19 +7,19 @@ use xdr_rs_serialize::error::Error;
 /// Decode a single payload of bytes into an XDR object.
 /// Value must implement XDRIn.
 pub struct Decoder<'a> {
-    payload: &'a str,
+    payload: &'a [u8],
 }
 
 impl<'a> Decoder<'a> {
     /// New decoder for known payload
-    pub fn new(raw: &'a str) -> Self {
+    pub fn new(raw: &'a [u8]) -> Self {
         Decoder { payload: raw }
     }
 
     /// Pop next argument of known type
     pub fn pop<T: XDRIn>(&mut self) -> Result<T, Error> {
         let bytes = &self.payload[..];
-        read_json_string(bytes.to_string())
+        Ok(T::read_xdr(bytes)?.0)
     }
 }
 

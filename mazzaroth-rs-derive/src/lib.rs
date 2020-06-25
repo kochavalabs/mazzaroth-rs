@@ -190,7 +190,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                             let result = inner.#function_ident(
                                 #(decoder.pop::<#arg_types>().expect("argument decoding failed")),*
                             );
-                            let mut encoder = mazzaroth_rs::Encoder::new();
+                            let mut encoder = mazzaroth_rs::Encoder::default();
                             encoder.push(result);
                             Ok(encoder.values())
                         }

@@ -1,7 +1,6 @@
 //! Decodes encoded bytes into an XDR object.
-
 use mazzaroth_xdr::Parameter;
-use xdr_rs_serialize::de::XDRIn;
+use xdr_rs_serialize::de::{read_json_string, XDRIn};
 use xdr_rs_serialize::error::Error;
 
 /// Decode a single payload of bytes into an XDR object.
@@ -19,7 +18,6 @@ impl<'a> Decoder<'a> {
     /// Pop next argument of known type
     pub fn pop<T: XDRIn>(&mut self) -> Result<T, Error> {
         let bytes = &self.payload[..];
-
         Ok(T::read_xdr(bytes)?.0)
     }
 }
@@ -27,13 +25,13 @@ impl<'a> Decoder<'a> {
 /// Decode a vector of Parameters into separate XDR object.
 /// Values must implement XDRIn.
 pub struct InputDecoder<'a> {
-    payload: &'a Vec<Parameter>,
+    payload: &'a [Parameter],
     position: usize,
 }
 
 impl<'a> InputDecoder<'a> {
     /// New decoder for known payload
-    pub fn new(raw: &'a Vec<Parameter>) -> Self {
+    pub fn new(raw: &'a [Parameter]) -> Self {
         InputDecoder {
             payload: raw,
             position: 0,
@@ -41,12 +39,14 @@ impl<'a> InputDecoder<'a> {
     }
 
     /// Pop next argument of known type
-    pub fn pop<T: XDRIn>(&mut self) -> Result<T, Error> {
+    pub fn pop<T: XDRIn>(&mut self, typ: &'static str) -> Result<T, Error> {
         // grab bytes from parameter and advance 1
         let bytes = &self.payload[self.position].t[..];
         self.position += 1;
-
-        Ok(T::read_xdr(bytes)?.0)
+        match typ {
+            "String" | "u64" | "i64" => read_json_string(format!(r#""{}""#, bytes.to_string())),
+            _ => read_json_string(bytes.to_string()),
+        }
     }
 
     /// Current position for the decoder
@@ -55,7 +55,7 @@ impl<'a> InputDecoder<'a> {
     }
 
     /// Decoder payload
-    pub fn payload(&self) -> &'a Vec<Parameter> {
+    pub fn payload(&self) -> &'a [Parameter] {
         self.payload
     }
 }

@@ -34,7 +34,7 @@ pub fn exec(query: String) -> Option<Vec<u8>> {
         result.set_len(len as usize);
         _kq_query_fetch(result.as_ptr(), hash.as_ptr());
     };
-    return Some(result);
+    Some(result)
 }
 
 #[cfg(feature = "host-mock")]

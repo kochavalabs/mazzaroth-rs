@@ -9,19 +9,25 @@ pub struct Encoder {
     values: Vec<u8>,
 }
 
-impl Encoder {
-    /// New encoder that will grow as items are pushed
-    pub fn new() -> Self {
+impl Default for Encoder {
+    fn default() -> Self {
         Encoder { values: Vec::new() }
     }
+}
 
+impl Encoder {
     /// Consume `val` to the Encoder
-    pub fn push<T: XDROut>(&mut self, val: T) {
+    pub fn push<T: XDROut>(&mut self, val: T, typ: &'static str) {
         let mut val_bytes: Vec<u8> = Vec::new();
-        val.write_xdr(&mut val_bytes).unwrap();
+        val.write_json(&mut val_bytes).unwrap();
 
         // Append bytes after the length
-        self.values_mut().extend_from_slice(&val_bytes);
+        match typ {
+            "String" | "u64" | "i64" => self
+                .values_mut()
+                .extend_from_slice(&val_bytes[1..val_bytes.len() - 1]),
+            _ => self.values_mut().extend_from_slice(&val_bytes),
+        };
     }
 
     /// Mutable reference to the Encoder vector
@@ -31,7 +37,6 @@ impl Encoder {
 
     /// return the vector of values
     pub fn values(self) -> Vec<u8> {
-        let result = self.values;
-        result
+        self.values
     }
 }

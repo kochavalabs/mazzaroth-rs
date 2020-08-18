@@ -1,6 +1,6 @@
 [package]
 name = "mazzaroth-rs-derive"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Kochavalabs <dev@mazzaroth.io>"]
 description = "Mazzaroth Rust library derivation macros"
 license = "MIT"

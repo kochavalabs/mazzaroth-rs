@@ -13,8 +13,6 @@ pub mod persistence;
 
 pub mod sql;
 
-pub mod crypto;
-
 pub mod transaction;
 
 pub mod errors;

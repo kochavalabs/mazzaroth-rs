@@ -56,33 +56,6 @@ extern "C" {
     /// Check if a particular account is the owner of the contract.
     pub(crate) fn _is_owner(key: *const u8, key_length: usize) -> bool;
 
-    /// Host hashing function: sha256
-    pub(crate) fn _sha256(data: *const u8, data_length: usize, hash: *mut u8);
-
-    /// Host hashing function: sha3_256
-    pub(crate) fn _sha3_256(data: *const u8, data_length: usize, hash: *mut u8);
-
-    /// Host hashing function: sha3_512
-    pub(crate) fn _sha3_512(data: *const u8, data_length: usize, hash: *mut u8);
-
-    /// Host hashing function: keccak256
-    pub(crate) fn _keccak256(data: *const u8, data_length: usize, hash: *mut u8);
-
-    /// Host hashing function: shake256
-    pub(crate) fn _shake256(data: *const u8, data_length: usize, hash: *mut u8);
-
-    /// Validates a signature using the provided public key. A Mazzaroth user's
-    /// account address can be used as the public key to verify transactions sent
-    /// from that user.
-    /// We are currently using a 32 byte X25519 elliptic curve public key and a 64
-    /// byte signature string.
-    pub(crate) fn _validate_signature(
-        pub_key: *const u8,
-        message: *const u8,
-        message_length: usize,
-        signature: *const u8,
-    ) -> u32;
-
     /// Return error messages to the host runtime
     pub(crate) fn _log_error(msg: *const u8, msg_length: usize);
 

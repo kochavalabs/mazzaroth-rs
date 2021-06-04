@@ -94,6 +94,31 @@ pub fn sender() -> Vec<u8> {
     }
 }
 
+pub trait TransactionInfo {
+    fn arguments(&self) -> Vec<u8>;
+    fn ret(&self, _values: &[u8]);
+    fn sender(&self) -> Vec<u8>;
+}
+
+#[derive(Clone)]
+struct TransactionInfoImpl {}
+impl TransactionInfo for TransactionInfoImpl {
+    fn arguments(&self) -> Vec<u8> {
+        arguments()
+    }
+    fn ret(&self, _values: &[u8]) {
+        ret(_values.to_vec())
+    }
+    fn sender(&self) -> Vec<u8> {
+        sender()
+    }
+}
+impl Default for TransactionInfoImpl {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
 #[cfg(test)]
 #[cfg(feature = "host-mock")]
 mod tests {

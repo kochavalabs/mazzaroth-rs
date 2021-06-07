@@ -101,13 +101,13 @@ pub trait TransactionInfo {
 }
 
 #[derive(Clone)]
-struct TransactionInfoImpl {}
+pub struct TransactionInfoImpl {}
 impl TransactionInfo for TransactionInfoImpl {
     fn arguments(&self) -> Vec<u8> {
         arguments()
     }
-    fn ret(&self, _values: &[u8]) {
-        ret(_values.to_vec())
+    fn ret(&self, values: &[u8]) {
+        ret(values.to_vec())
     }
     fn sender(&self) -> Vec<u8> {
         sender()

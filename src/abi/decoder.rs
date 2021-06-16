@@ -1,5 +1,5 @@
 //! Decodes encoded bytes into an XDR object.
-use mazzaroth_xdr::Parameter;
+use mazzaroth_xdr::Argument;
 use xdr_rs_serialize::de::{read_json_string, XDRIn};
 use xdr_rs_serialize::error::Error;
 
@@ -22,16 +22,16 @@ impl<'a> Decoder<'a> {
     }
 }
 
-/// Decode a vector of Parameters into separate XDR object.
+/// Decode a vector of Arguments into separate XDR object.
 /// Values must implement XDRIn.
 pub struct InputDecoder<'a> {
-    payload: &'a [Parameter],
+    payload: &'a [Argument],
     position: usize,
 }
 
 impl<'a> InputDecoder<'a> {
     /// New decoder for known payload
-    pub fn new(raw: &'a [Parameter]) -> Self {
+    pub fn new(raw: &'a [Argument]) -> Self {
         InputDecoder {
             payload: raw,
             position: 0,
@@ -40,7 +40,7 @@ impl<'a> InputDecoder<'a> {
 
     /// Pop next argument of known type
     pub fn pop<T: XDRIn>(&mut self, typ: &'static str) -> Result<T, Error> {
-        // grab bytes from parameter and advance 1
+        // grab bytes from argument and advance 1
         let bytes = &self.payload[self.position].t[..];
         self.position += 1;
         match typ {
@@ -55,7 +55,7 @@ impl<'a> InputDecoder<'a> {
     }
 
     /// Decoder payload
-    pub fn payload(&self) -> &'a [Parameter] {
+    pub fn payload(&self) -> &'a [Argument] {
         self.payload
     }
 }

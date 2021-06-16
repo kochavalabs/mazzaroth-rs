@@ -8,6 +8,5 @@ pub trait ContractInterface {
 #[derive(Debug)]
 pub enum ContractErrors {
     InvalidInputType,
-    InvalidWriteMethodName,
-    InvalidReadMethodName,
+    InvalidFunctionName,
 }

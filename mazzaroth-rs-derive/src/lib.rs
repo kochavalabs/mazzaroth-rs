@@ -199,14 +199,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                     })
                 }
 			},
-			_ => None,
-		}
-	}).collect();
-
-    // Same as above but only for Readonly functions
-    let readonly_functions: Vec<proc_macro2::TokenStream> = contract.trait_items().iter().filter_map(|item| {
-		match *item {
-			TraitItem::Readonly(ref function) => {
+            TraitItem::Readonly(ref function) => {
 				let function_ident = &function.name;
 
                 // Create a matchname string literal that matches name of function
@@ -276,30 +269,16 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
             fn execute(&mut self, payload: &[u8]) -> Result<Vec<u8>, mazzaroth_rs::ContractErrors> {
                 let inner = &mut self.inner;
 
-                // first decode the input from stream
+                // first decode the call from stream
                 let mut payload_decoder = mazzaroth_rs::Decoder::new(payload);
-                let mut input = payload_decoder.pop::<mazzaroth_xdr::Input>().expect("argument decoding failed");
+                let mut call = payload_decoder.pop::<mazzaroth_xdr::Call>().expect("argument decoding failed");
 
-                // Then create a decoder for params
-                let mut decoder = mazzaroth_rs::InputDecoder::new(&input.parameters);
+                // Then create a decoder for arguments
+                let mut decoder = mazzaroth_rs::InputDecoder::new(&call.arguments);
 
-                match input.inputType {
-                    mazzaroth_xdr::InputType::EXECUTE => {
-                        // Call executes a normal contract function (excludes readonly functions)
-                        match input.function.as_str() {
-                            #(#functions,)*
-                            _ => Err(mazzaroth_rs::ContractErrors::InvalidWriteMethodName),
-                        }
-                    },
-                    mazzaroth_xdr::InputType::READONLY => {
-                        // Readonly executes a function tagged with readonly
-                        // First param should be the string function name to call
-                        match input.function.as_str() {
-                            #(#readonly_functions,)*
-                            _ => Err(mazzaroth_rs::ContractErrors::InvalidReadMethodName),
-                        }
-                    },
-                    _ => Err(mazzaroth_rs::ContractErrors::InvalidInputType),
+                match call.function.as_str() {
+                    #(#functions,)*
+                    _ => Err(mazzaroth_rs::ContractErrors::InvalidFunctionName),
                 }
             }
         }

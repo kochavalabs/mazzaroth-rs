@@ -73,9 +73,9 @@ extern crate proc_macro2;
 extern crate syn;
 #[macro_use]
 extern crate quote;
-extern crate serde_json;
-#[macro_use]
-extern crate serde_derive;
+
+extern crate mazzaroth_xdr;
+extern crate xdr_rs_serialize;
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;

@@ -1,7 +1,7 @@
 //! JSON generation
 
-use xdr_rs_serialize::ser::XDROut;
 use mazzaroth_xdr::{Abi, FunctionSignature, Parameter};
+use xdr_rs_serialize::ser::XDROut;
 
 use contract;
 
@@ -111,10 +111,12 @@ pub fn write_json_abi(intf: &contract::Contract) -> JsonResult<()> {
 
     // Serialize the ABI object to JSON bytes
     let mut val_bytes: Vec<u8> = Vec::new();
-    abi.write_json(&mut val_bytes).map_err(|err| JsonError::failed_to_write_json_bytes(err))?;
+    abi.write_json(&mut val_bytes)
+        .map_err(|err| JsonError::failed_to_write_json_bytes(err))?;
 
     // Write JSON Bytes to the target file
-    f.write_all(&val_bytes).map_err(|err| JsonError::failed_to_write_json_abi_file(err))?;
+    f.write_all(&val_bytes)
+        .map_err(|err| JsonError::failed_to_write_json_abi_file(err))?;
 
     Ok(())
 }
@@ -140,16 +142,14 @@ impl<'a> From<&'a contract::Contract> for Abi {
             }
         }
 
-        Abi{
-            functions: result,
-        }
+        Abi { functions: result }
     }
 }
 
 // Trait implementation to build a Function Signature from a Contract function
 impl<'a> From<&'a contract::Function> for FunctionSignature {
     fn from(item: &contract::Function) -> Self {
-       FunctionSignature {
+        FunctionSignature {
             functionType: "".to_string(), // To be set by caller based on function type
             name: item.name.to_string(),
             inputs: item

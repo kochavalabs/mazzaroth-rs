@@ -78,7 +78,7 @@ impl std::error::Error for JsonError {
         }
     }
 
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         match self {
             JsonError::FailedToCreateDirectory(err) => Some(err),
             JsonError::FailedToCreateJsonFile(err) => Some(err),

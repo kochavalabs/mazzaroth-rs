@@ -17,7 +17,7 @@
 //! call a host function to retrieve function input, execute the function, and return a response.
 //!
 //! Here is a basic Hello World contract example:
-//! ```
+//! ```ignore
 //! // must include the ContractInterface and mazzaroth_abi for compiling the macro
 //! extern crate mazzaroth_rs;
 //! extern crate mazzaroth_rs_derive;
@@ -94,7 +94,7 @@ use json::write_json_abi;
 /// The argument becomes the module name used to construct the contract in main.
 ///
 /// Example:
-/// ```
+/// ```ignore
 /// #[mazzaroth_abi(HelloWorld)]
 /// pub trait HelloWorldContract {
 ///     

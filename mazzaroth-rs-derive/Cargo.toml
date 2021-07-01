@@ -12,7 +12,7 @@ readme = "README.md"
 syn = { version = "0.15.12" , features = ["full", "extra-traits", "parsing"] }
 quote = "0.6.8"
 proc-macro2 = "0.4"
-mazzaroth-xdr = "0.4.0"
+mazzaroth-xdr = "0.4.2"
 xdr-rs-serialize = "0.2.5"
 
 [lib]

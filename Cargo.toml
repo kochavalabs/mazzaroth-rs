@@ -12,8 +12,8 @@ readme = "README.md"
 sha3 = "0.8.1"
 cfg-if = "0.1.3"
 wasm-bindgen = "0.2.20"
-mazzaroth-xdr = { branch = "develop", version = "0.2.7" }
-xdr-rs-serialize = { branch = "develop", version = "0.2.5" }
+mazzaroth-xdr = "0.4.2"
+xdr-rs-serialize = "0.2.5"
 
 [features]
 host-mock = []

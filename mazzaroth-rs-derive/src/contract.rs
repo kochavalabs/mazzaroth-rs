@@ -51,7 +51,11 @@ impl Contract {
         };
 
         // Parse the trait items
-        let items = contract_trait.items.into_iter().map(TraitItem::from_contract_item).collect();
+        let items = contract_trait
+            .items
+            .into_iter()
+            .map(TraitItem::from_contract_item)
+            .collect();
 
         Contract {
             name: contract_trait.ident.to_string(),

@@ -1,10 +1,13 @@
 //! JSON generation
 
+use mazzaroth_xdr::{Abi, FunctionSignature, Parameter};
+use xdr_rs_serialize::ser::XDROut;
+
 use contract;
-use serde_json;
 
 use std;
 use std::io;
+use std::io::Write;
 
 /// The result type for JSON errors.
 pub type JsonResult<T> = std::result::Result<T, JsonError>;
@@ -14,7 +17,8 @@ pub type JsonResult<T> = std::result::Result<T, JsonError>;
 pub enum JsonError {
     FailedToCreateDirectory(io::Error),
     FailedToCreateJsonFile(io::Error),
-    FailedToWriteJsonAbiFile(serde_json::Error),
+    FailedToWriteJsonAbiFile(io::Error),
+    FailedToWriteJsonBytes(xdr_rs_serialize::error::Error),
 }
 
 impl JsonError {
@@ -31,8 +35,14 @@ impl JsonError {
     }
 
     /// Returns a JSON error indicating that the writing of the JSON
+    /// to bytes failed.
+    pub fn failed_to_write_json_bytes(err: xdr_rs_serialize::error::Error) -> Self {
+        JsonError::FailedToWriteJsonBytes(err)
+    }
+
+    /// Returns a JSON error indicating that the writing of the JSON
     /// abi file failed.
-    pub fn failed_to_write_json_abi_file(err: serde_json::Error) -> Self {
+    pub fn failed_to_write_json_abi_file(err: io::Error) -> Self {
         JsonError::FailedToWriteJsonAbiFile(err)
     }
 }
@@ -45,6 +55,9 @@ impl std::fmt::Display for JsonError {
             }
             JsonError::FailedToCreateJsonFile(err) => {
                 write!(f, "failed to create JSON abi file: {:?}", err)
+            }
+            JsonError::FailedToWriteJsonBytes(err) => {
+                write!(f, "failed to write JSON bytes: {:?}", err)
             }
             JsonError::FailedToWriteJsonAbiFile(err) => {
                 write!(f, "failed to write JSON abi file: {:?}", err)
@@ -60,14 +73,16 @@ impl std::error::Error for JsonError {
                 "failed to create directory for the JSON abi file"
             }
             JsonError::FailedToCreateJsonFile(_) => "failed to create JSON abi file",
+            JsonError::FailedToWriteJsonBytes(_) => "failed to write JSON bytes",
             JsonError::FailedToWriteJsonAbiFile(_) => "failed to write JSON abi file",
         }
     }
 
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         match self {
             JsonError::FailedToCreateDirectory(err) => Some(err),
             JsonError::FailedToCreateJsonFile(err) => Some(err),
+            JsonError::FailedToWriteJsonBytes(err) => Some(err),
             JsonError::FailedToWriteJsonAbiFile(err) => Some(err),
         }
     }
@@ -87,54 +102,26 @@ pub fn write_json_abi(intf: &contract::Contract) -> JsonResult<()> {
         target
     };
 
+    // Create the target/*.json file
     let mut f =
         fs::File::create(target).map_err(|err| JsonError::failed_to_create_json_file(err))?;
 
+    // Convert the Contract into the Mazzaroth_xdr ABI object
     let abi: Abi = intf.into();
 
-    serde_json::to_writer_pretty(&mut f, &abi)
+    // Serialize the ABI object to JSON bytes
+    let mut val_bytes: Vec<u8> = Vec::new();
+    abi.write_json(&mut val_bytes)
+        .map_err(|err| JsonError::failed_to_write_json_bytes(err))?;
+
+    // Write JSON Bytes to the target file
+    f.write_all(&val_bytes)
         .map_err(|err| JsonError::failed_to_write_json_abi_file(err))?;
 
     Ok(())
 }
 
-#[derive(Serialize, Debug)]
-pub struct FunctionEntry {
-    pub name: String,
-    #[serde(rename = "inputs")]
-    pub arguments: Vec<Argument>,
-    pub outputs: Vec<Argument>,
-    // pub constant: bool, // TODO?
-}
-
-#[derive(Serialize, Debug)]
-pub struct Argument {
-    pub name: String,
-    #[serde(rename = "type")]
-    pub type_: String,
-    pub codec: String,
-}
-
-#[derive(Serialize, Debug)]
-pub struct ReadonlyEntry {
-    pub name: String,
-    #[serde(rename = "inputs")]
-    pub arguments: Vec<Argument>,
-    pub outputs: Vec<Argument>,
-}
-
-#[derive(Serialize, Debug)]
-#[serde(tag = "type")]
-pub enum AbiEntry {
-    #[serde(rename = "function")]
-    Function(FunctionEntry),
-    #[serde(rename = "readonly")]
-    Readonly(ReadonlyEntry),
-}
-
-#[derive(Serialize, Debug)]
-pub struct Abi(pub Vec<AbiEntry>);
-
+// Trait implementation to build an ABI object from the Contract
 impl<'a> From<&'a contract::Contract> for Abi {
     fn from(intf: &contract::Contract) -> Self {
         let mut result = Vec::new();
@@ -142,29 +129,35 @@ impl<'a> From<&'a contract::Contract> for Abi {
             match *item {
                 // contract::Item::Event(ref event) => result.push(AbiEntry::Event(event.into())),
                 contract::TraitItem::Function(ref signature) => {
-                    result.push(AbiEntry::Function(signature.into()))
+                    let mut function: FunctionSignature = signature.into();
+                    function.functionType = "function".to_string();
+                    result.push(function)
                 }
                 contract::TraitItem::Readonly(ref signature) => {
-                    result.push(AbiEntry::Readonly(signature.into()))
+                    let mut function: FunctionSignature = signature.into();
+                    function.functionType = "readonly".to_string();
+                    result.push(function)
                 }
                 _ => {}
             }
         }
 
-        Abi(result)
+        Abi { functions: result }
     }
 }
 
-impl<'a> From<&'a contract::Function> for FunctionEntry {
+// Trait implementation to build a Function Signature from a Contract function
+impl<'a> From<&'a contract::Function> for FunctionSignature {
     fn from(item: &contract::Function) -> Self {
-        FunctionEntry {
+        FunctionSignature {
+            functionType: "".to_string(), // To be set by caller based on function type
             name: item.name.to_string(),
-            arguments: item
+            inputs: item
                 .arguments
                 .iter()
-                .map(|&(ref pat, ref ty)| Argument {
+                .map(|&(ref pat, ref ty)| Parameter {
                     name: quote! { #pat }.to_string(),
-                    type_: canonicalize_type(ty),
+                    parameterType: canonicalize_type(ty),
                     codec: check_codec(item, ty),
                 })
                 .collect(),
@@ -172,36 +165,9 @@ impl<'a> From<&'a contract::Function> for FunctionEntry {
                 .ret_types
                 .iter()
                 .enumerate()
-                .map(|(idx, ty)| Argument {
+                .map(|(idx, ty)| Parameter {
                     name: format!("returnValue{}", idx),
-                    type_: canonicalize_type(ty),
-                    codec: check_codec(item, ty),
-                })
-                .collect(),
-        }
-    }
-}
-
-impl<'a> From<&'a contract::Function> for ReadonlyEntry {
-    fn from(item: &contract::Function) -> Self {
-        ReadonlyEntry {
-            name: item.name.to_string(),
-            arguments: item
-                .arguments
-                .iter()
-                .map(|&(ref pat, ref ty)| Argument {
-                    name: quote! { #pat }.to_string(),
-                    type_: canonicalize_type(ty),
-                    codec: check_codec(item, ty),
-                })
-                .collect(),
-            outputs: item
-                .ret_types
-                .iter()
-                .enumerate()
-                .map(|(idx, ty)| Argument {
-                    name: format!("returnValue{}", idx),
-                    type_: canonicalize_type(ty),
+                    parameterType: canonicalize_type(ty),
                     codec: check_codec(item, ty),
                 })
                 .collect(),

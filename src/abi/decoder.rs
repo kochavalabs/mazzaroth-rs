@@ -17,7 +17,7 @@ impl<'a> Decoder<'a> {
 
     /// Pop next argument of known type
     pub fn pop<T: XDRIn>(&mut self) -> Result<T, Error> {
-        let bytes = &self.payload[..];
+        let bytes = &self.payload;
         Ok(T::read_xdr(bytes)?.0)
     }
 }

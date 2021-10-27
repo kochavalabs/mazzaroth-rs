@@ -23,8 +23,8 @@ pub static mut INSERT_RESULT: Result<u32, u32> = Ok(0);
 #[cfg(not(feature = "host-mock"))]
 pub fn exec(query: String) -> Option<Vec<u8>> {
     let query_bytes: Vec<u8> = query.as_bytes().to_vec();
-    let mut hash = Vec::with_capacity(16 as usize); // 32 byte (256) hash
-    unsafe { hash.set_len(16 as usize) };
+    let mut hash = Vec::with_capacity(16); // 32 byte (256) hash
+    unsafe { hash.set_len(16) };
     let len = unsafe { _kq_query_run(query_bytes.as_ptr(), query_bytes.len(), hash.as_ptr()) };
     if len == 0 {
         return None;

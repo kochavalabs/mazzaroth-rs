@@ -72,6 +72,12 @@ impl HelloWorldContract for Hello {
 }
 ```
 
+## Running Tests
+
+```console
+cargo test --features host-mock
+```
+
 ## Generating Documentation
 
 From the root directory run the command:

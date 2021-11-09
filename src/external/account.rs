@@ -44,10 +44,4 @@ mod tests {
         }
         assert_eq!(is_owner(vec![]), true);
     }
-
-    #[test]
-    fn test_get_name_set() {
-        set_name(vec![], "asdf".to_string());
-        assert_eq!(get_name(vec![]), "asdf".to_string());
-    }
 }

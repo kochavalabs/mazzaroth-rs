@@ -1,6 +1,6 @@
 //! JSON generation
 
-use mazzaroth_xdr::{Abi, FunctionSignature, Parameter};
+use mazzaroth_xdr::{Abi, FunctionSignature, Parameter, FunctionType};
 use xdr_rs_serialize::ser::XDROut;
 
 use contract;
@@ -8,6 +8,9 @@ use contract;
 use std;
 use std::io;
 use std::io::Write;
+
+// Pull Version number from Cargo metadata to use as ABI Version
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 /// The result type for JSON errors.
 pub type JsonResult<T> = std::result::Result<T, JsonError>;
@@ -130,19 +133,19 @@ impl<'a> From<&'a contract::Contract> for Abi {
                 // contract::Item::Event(ref event) => result.push(AbiEntry::Event(event.into())),
                 contract::TraitItem::Function(ref signature) => {
                     let mut function: FunctionSignature = signature.into();
-                    function.functionType = "function".to_string();
+                    function.functionType = FunctionType::WRITE;
                     result.push(function)
                 }
                 contract::TraitItem::Readonly(ref signature) => {
                     let mut function: FunctionSignature = signature.into();
-                    function.functionType = "readonly".to_string();
+                    function.functionType = FunctionType::READ;
                     result.push(function)
                 }
                 _ => {}
             }
         }
 
-        Abi { functions: result }
+        Abi { version: VERSION.to_string(), functions: result }
     }
 }
 
@@ -150,37 +153,26 @@ impl<'a> From<&'a contract::Contract> for Abi {
 impl<'a> From<&'a contract::Function> for FunctionSignature {
     fn from(item: &contract::Function) -> Self {
         FunctionSignature {
-            functionType: "".to_string(), // To be set by caller based on function type
-            name: item.name.to_string(),
-            inputs: item
+            functionType: FunctionType::UNKNOWN, // To be set by caller based on function type
+            functionName: item.name.to_string(),
+            parameters: item
                 .arguments
                 .iter()
                 .map(|&(ref pat, ref ty)| Parameter {
-                    name: quote! { #pat }.to_string(),
+                    parameterName: quote! { #pat }.to_string(),
                     parameterType: canonicalize_type(ty),
-                    codec: check_codec(item, ty),
                 })
                 .collect(),
-            outputs: item
+            returns: item
                 .ret_types
                 .iter()
                 .enumerate()
                 .map(|(idx, ty)| Parameter {
-                    name: format!("returnValue{}", idx),
+                    parameterName: format!("returnValue{}", idx),
                     parameterType: canonicalize_type(ty),
-                    codec: check_codec(item, ty),
                 })
                 .collect(),
         }
-    }
-}
-
-// Return the codec value for the type, or "bytes"
-fn check_codec(item: &contract::Function, ty: &syn::Type) -> String {
-    if let Some(value) = item.codec.get(&canonicalize_type(ty)) {
-        value.to_string()
-    } else {
-        "bytes".to_string()
     }
 }
 
@@ -225,7 +217,7 @@ fn push_canonicalized_primitive(target: &mut String, seg: &syn::PathSegment) {
         "String" => target.push_str("string"),
         "bool" => target.push_str("bool"),
         "Vec" => push_canonicalized_vec(target, &seg.arguments),
-        val => target.push_str(val),
+        _val => target.push_str("json"),
     }
 }
 

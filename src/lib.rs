@@ -76,7 +76,7 @@ pub use abi::encoder::Encoder;
 
 // Contract trait definition
 mod contract;
-pub use contract::{ContractErrors, ContractInterface};
+pub use contract::{ContractError, ContractInterface};
 
 #[macro_use]
 extern crate cfg_if;

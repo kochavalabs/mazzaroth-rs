@@ -181,7 +181,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                     Some(quote! {
                         #match_name => {
                             inner.#function_ident(
-                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2)).expect("argument decoding failed")),*
+                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2))?),*
                             );
                             Ok(Vec::new())
                         }
@@ -190,7 +190,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                     Some(quote! {
                         #match_name => {
                             let result = inner.#function_ident(
-                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2)).expect("argument decoding failed")),*
+                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2))?),*
                             );
                             let mut encoder = mazzaroth_rs::Encoder::default();
                             encoder.push(result, stringify!(#ret_type));
@@ -213,7 +213,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                     Some(quote! {
                         #match_name => {
                             inner.#function_ident(
-                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2)).expect("argument decoding failed")),*
+                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2))?),*
                             );
                             Ok(Vec::new())
                         }
@@ -222,7 +222,7 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
                     Some(quote! {
                         #match_name => {
                             let result = inner.#function_ident(
-                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2)).expect("argument decoding failed")),*
+                                #(decoder.pop::<#arg_types>(stringify!(#arg_types2))?),*
                             );
                             let mut encoder = mazzaroth_rs::Encoder::default();
                             encoder.push(result, stringify!(#ret_type));
@@ -266,19 +266,22 @@ fn tokenize_contract(name: &str, contract: &Contract) -> proc_macro2::TokenStrea
         impl<T: #name_ident> mazzaroth_rs::ContractInterface for #endpoint_ident<T> {
             #[allow(unused_mut)]
             #[allow(unused_variables)]
-            fn execute(&mut self, payload: &[u8]) -> Result<Vec<u8>, mazzaroth_rs::ContractErrors> {
+            fn execute(&mut self, payload: &[u8]) -> Result<Vec<u8>, mazzaroth_rs::ContractError> {
                 let inner = &mut self.inner;
 
                 // first decode the call from stream
                 let mut payload_decoder = mazzaroth_rs::Decoder::new(payload);
-                let mut call = payload_decoder.pop::<mazzaroth_xdr::Call>().expect("argument decoding failed");
+                match payload_decoder.pop::<mazzaroth_xdr::Call>() {
+                    Ok(call) => {
+                         // Then create a decoder for arguments
+                        let mut decoder = mazzaroth_rs::InputDecoder::new(&call.arguments);
 
-                // Then create a decoder for arguments
-                let mut decoder = mazzaroth_rs::InputDecoder::new(&call.arguments);
-
-                match call.function.as_str() {
-                    #(#functions,)*
-                    _ => Err(mazzaroth_rs::ContractErrors::InvalidFunctionName),
+                        match call.function.as_str() {
+                            #(#functions,)*
+                            _ => Err(mazzaroth_rs::ContractError::invalid_function()),
+                        }
+                    },
+                    _ => Err(mazzaroth_rs::ContractError::invalid_function())
                 }
             }
         }

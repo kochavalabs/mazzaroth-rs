@@ -45,9 +45,15 @@ impl ContractError {
 impl std::fmt::Display for ContractError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind() {
-            ContractErrorKinds::DeserializeError(err) => write!(f, "Error deserializing arguments: {}", err),
-            ContractErrorKinds::InvalidArguments => write!(f, "Failed to parse arguments for function."),
-            ContractErrorKinds::InvalidFunctionName => write!(f, "Could not find function with given name."),
+            ContractErrorKinds::DeserializeError(err) => {
+                write!(f, "Error deserializing arguments: {}", err)
+            }
+            ContractErrorKinds::InvalidArguments => {
+                write!(f, "Failed to parse arguments for function.")
+            }
+            ContractErrorKinds::InvalidFunctionName => {
+                write!(f, "Could not find function with given name.")
+            }
         }
     }
 }

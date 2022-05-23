@@ -12,8 +12,8 @@ readme = "README.md"
 syn = { version = "0.15.12" , features = ["full", "extra-traits", "parsing"] }
 quote = "0.6.8"
 proc-macro2 = "0.4"
-mazzaroth-xdr = "0.8.1"
-xdr-rs-serialize = "0.3.0"
+mazzaroth-xdr = "0.8.2"
+xdr-rs-serialize = "0.3.1"
 
 [lib]
 name = "mazzaroth_rs_derive"

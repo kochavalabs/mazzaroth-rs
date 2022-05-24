@@ -83,9 +83,9 @@ impl std::error::Error for JsonError {
 
     fn cause(&self) -> Option<&dyn std::error::Error> {
         match self {
+            JsonError::FailedToWriteJsonBytes(..) => None,
             JsonError::FailedToCreateDirectory(err) => Some(err),
             JsonError::FailedToCreateJsonFile(err) => Some(err),
-            JsonError::FailedToWriteJsonBytes(err) => Some(err),
             JsonError::FailedToWriteJsonAbiFile(err) => Some(err),
         }
     }

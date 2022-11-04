@@ -18,7 +18,7 @@ mazzaroth-rs-derive
 mazzaroth-xdr
 
 Every contract will have a similar base layout for the main function and the contract trait definition.
-`main()` is used as the entry point and has several important features.  It will instantiate the contract,
+`entry()` is used as the entry point and has several important features.  It will instantiate the contract,
 call a host function to retrieve function input, execute the function, and return a response.
 
 Here is a basic Hello World contract example:
@@ -34,7 +34,7 @@ use mazzaroth_rs_derive::mazzaroth_abi;
 use mazzaroth_rs::external::{transaction, log};
 
 #[no_mangle]
-pub fn main() {
+pub fn entry() {
     // panic hook is set to call the host error log function when a panic occurs
     std::panic::set_hook(Box::new(mazzaroth_rs::external::errors::hook));
 
